@@ -63,6 +63,7 @@ async function read(session) {
           clearTimeout(session.timer)
           el("device").textContent = "tscircuit " + match[1]
           state.textContent = "Connected · Firmware " + match[2]
+          el("rate-field").hidden = !/^1\.([1-9]\d*)\./.test(match[2])
           el("buzzer").hidden = match[1] !== "buzzer"
         }
       }
@@ -99,7 +100,9 @@ connect.onclick = async () => {
 
 el("play").onsubmit = event => {
   event.preventDefault()
-  send("beep " + el("duration").valueAsNumber)
+  const ms = el("duration").valueAsNumber
+  const hz = el("rate").valueAsNumber
+  send(!el("rate-field").hidden && hz && ms ? `tone ${hz} ${ms}` : `beep ${ms}`)
 }
 el("terminal").onsubmit = event => {
   event.preventDefault()

@@ -10,10 +10,40 @@ static bool discard;
 static uint32_t started, lastByte;
 static uint16_t duration;
 
+static void stopTimer(void) {
+  ET2 = 0;
+  TR2 = 0;
+  TF2 = 0;
+}
+
 static void beep(uint16_t ms) {
+  stopTimer();
   started = millis();
   duration = ms;
   P1_4 = ms != 0;
+}
+
+// Timer 2 auto-reloads at F_CPU/12. Each interrupt is one half period.
+static void squareWave(uint16_t hz, uint16_t ms) {
+  uint16_t reload = 0 - (uint16_t)((F_CPU / 24UL + hz / 2) / hz);
+  beep(ms);
+  T2CON = 0;
+  T2MOD &= ~bT2_CLK;
+  RCAP2H = TH2 = reload >> 8;
+  RCAP2L = TL2 = reload & 0xff;
+  ET2 = 1;
+  TR2 = 1;
+}
+
+static bool number(const char *text, uint16_t *value) {
+  uint16_t n = 0;
+  if (!*text) return false;
+  while (*text) {
+    if (*text < '0' || *text > '9' || n > 1000) return false;
+    n = n * 10 + (*text++ - '0');
+  }
+  *value = n;
+  return n <= 10000;
 }
 
 static void reply(const char *message) {
@@ -25,10 +55,11 @@ static void reply(const char *message) {
 
 static void command(void) {
   uint16_t ms = 0;
-  uint8_t i;
-  if (!strcmp(line, "id")) reply("DEVICE tscircuit buzzer 1.0.0");
+  uint16_t hz;
+  char *arg;
+  if (!strcmp(line, "id")) reply("DEVICE tscircuit buzzer 1.1.0");
   else if (!strcmp(line, "help") || !strcmp(line, "?"))
-    reply("id | help | beep [0-10000 ms, default 250] | stop | status | led on | led off");
+    reply("id | help | beep [0-10000 ms, default 250] | tone <20-2000 Hz> <1-10000 ms> | stop | status | led on | led off");
   else if (!strcmp(line, "status")) reply(duration ? "STATUS buzzing" : "STATUS idle");
   else if (!strcmp(line, "led on") || !strcmp(line, "led off")) {
     P1_5 = !strcmp(line, "led off");
@@ -37,12 +68,14 @@ static void command(void) {
     beep(line[0] == 's' ? 0 : 250);
     reply("OK");
   } else if (!strncmp(line, "beep ", 5) && line[5]) {
-    for (i = 5; line[i]; i++) {
-      if (line[i] < '0' || line[i] > '9' || ms > 1000) break;
-      ms = ms * 10 + (line[i] - '0');
-    }
-    if (line[i] || ms > 10000) reply("ERR duration must be 0-10000 ms");
+    if (!number(line + 5, &ms)) reply("ERR duration must be 0-10000 ms");
     else { beep(ms); reply("OK"); }
+  } else if (!strncmp(line, "tone ", 5)) {
+    arg = strchr(line + 5, ' ');
+    if (arg) *arg++ = 0;
+    if (!arg || !number(line + 5, &hz) || hz < 20 || hz > 2000 ||
+        !number(arg, &ms) || ms == 0) reply("ERR tone <20-2000 Hz> <1-10000 ms>");
+    else { squareWave(hz, ms); reply("OK"); }
   } else reply("ERR unknown command; try help");
 }
 
@@ -85,6 +118,7 @@ void setup() {
 void loop() {
   if (!UsbConfig || (USB_MIS_ST & bUMS_SUSPEND)) {
     P1_5 = 1;
+    stopTimer();
     P1_4 = 0;
     duration = 0;
     used = 0;
