@@ -7,7 +7,8 @@ async function readUsbSwitch(handle) {
   return (result.data.getUint8(0) & 1) === 0
 }
 
-export async function openToggle(handle, usb = false) {
+export async function openSwitch(handle, kind, usb) {
+  if (kind !== "limit" && kind !== "toggle") throw Error("Choose the connected switch type.")
   const readSwitch = usb ? () => readUsbSwitch(handle) : async () => (await handle.getSignals()).clearToSend
   if (usb) await handle.open()
   else await handle.open({baudRate:9600, flowControl:"none"})
@@ -18,7 +19,7 @@ export async function openToggle(handle, usb = false) {
     await handle.close().catch(() => {})
     throw err
   }
-  const session = {handle, readSwitch, kind:"toggle", async close() {
+  const session = {handle, readSwitch, kind, async close() {
     session.stopped = true
     await session.loop
     await handle.close().catch(() => {})
@@ -26,7 +27,7 @@ export async function openToggle(handle, usb = false) {
   return session
 }
 
-export function startToggle(root, session, failed) {
+export function startSwitch(root, session, failed) {
   const panel = root.getElementById("toggle")
   const output = root.getElementById("switch-state")
   root.getElementById("serial").hidden = true
@@ -42,7 +43,9 @@ export function startToggle(root, session, failed) {
         candidate = clearToSend
         since = now
       } else if (now - since >= 20) {
-        const label = candidate ? "On" : "Off"
+        const label = session.kind === "limit"
+          ? (candidate ? "Released" : "Pressed")
+          : (candidate ? "On" : "Off")
         if (output.textContent !== label) output.textContent = label
       }
       await new Promise(resolve => setTimeout(resolve, 10))

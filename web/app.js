@@ -1,11 +1,14 @@
-import {openToggle, startToggle} from "./toggle.js"
+import {openSwitch, startSwitch} from "./contact-switch.js"
 import {DistanceSensor} from "./distance/sensor.js"
 import {identifySerial} from "./serial.js"
 import {startRanging, startSerial} from "./device-controls.js"
 
 const names = {
   encoder: "Rotary encoder", potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
-  toggle: "Toggle switch", buzzer: "Buzzer", resetter: "USB resetter"
+  toggle: "Toggle switch", limit: "Limit switch", buzzer: "Buzzer", resetter: "USB resetter"
+}
+function isContactSwitch(kind) {
+  return kind === "toggle" || kind === "limit"
 }
 const serialIds = {
   toggle: {usbVendorId: 0x1a86, usbProductId: 0x7523},
@@ -17,7 +20,7 @@ const usbIds = {
   toggle: {vendorId: 0x1a86, productId: 0x7523}
 }
 function usesUsb(kind) {
-  return kind === "distance" || (kind === "toggle" && /Mac/i.test(navigator.platform))
+  return kind === "distance" || (isContactSwitch(kind) && /Mac/i.test(navigator.platform))
 }
 const cards = new Map()
 const claimed = new Set()
@@ -64,13 +67,13 @@ async function disconnect(card, error) {
   }
 }
 
-async function openDevice(handle, usb) {
+async function openDevice(handle, usb, requested) {
   if (!usb) {
     const info = handle.getInfo()
-    if (info.usbVendorId === serialIds.toggle.usbVendorId && info.usbProductId === serialIds.toggle.usbProductId) return openToggle(handle)
+    if (info.usbVendorId === serialIds.toggle.usbVendorId && info.usbProductId === serialIds.toggle.usbProductId) return openSwitch(handle, requested, false)
     return Object.assign(await identifySerial(handle), {handle})
   }
-  if (handle.vendorId === usbIds.toggle.vendorId && handle.productId === usbIds.toggle.productId) return openToggle(handle, true)
+  if (handle.vendorId === usbIds.toggle.vendorId && handle.productId === usbIds.toggle.productId) return openSwitch(handle, requested, true)
   await handle.open()
   try {
     await handle.selectConfiguration(1)
@@ -97,12 +100,13 @@ async function attach(handle, usb, {requested, target, restoring = false} = {}) 
   claimed.add(handle)
   let session, attached = false
   try {
-    session = await openDevice(handle, usb)
+    session = await openDevice(handle, usb, requested)
     const kind = session.kind
     if (!Object.hasOwn(names, kind)) throw Error("Unrecognized device identity.")
     if (requested && requested !== kind) throw Error("Selected " + names[kind] + ". Choose " + names[requested] + " instead.")
     if (target && !cards.has(target.saved.id)) return
-    let card = target || cards.get(remembered.get(handle))
+    const previous = cards.get(remembered.get(handle))
+    let card = target || (previous?.saved.kind === kind ? previous : null)
     if (restoring && !card) {
       const matches = [...cards.values()].filter(c => c.saved.kind === kind)
       // Identical USB bridges can lack a unique serial number. Never guess between cards.
@@ -126,7 +130,7 @@ async function attach(handle, usb, {requested, target, restoring = false} = {}) 
     r.getElementById("state").textContent = session.version ? "Connected · Firmware " + session.version : "Connected"
     r.getElementById("reconnect").textContent = "Disconnect"
     r.getElementById("live").hidden = false
-    card.cleanup = kind === "distance" ? startRanging(r,session,failed) : kind === "toggle" ? startToggle(r,session,failed) : startSerial(r,session,failed)
+    card.cleanup = kind === "distance" ? startRanging(r,session,failed) : isContactSwitch(kind) ? startSwitch(r,session,failed) : startSerial(r,session,failed)
     attached = true
   } finally {
     if (!attached) {
@@ -142,8 +146,9 @@ async function choose(kind, target) {
   const usb = usesUsb(kind)
   try {
     if (!(usb ? navigator.usb : navigator.serial)) throw Error("Open this page in desktop Chrome or Edge to connect this device.")
-    const handle = usb ? await navigator.usb.requestDevice({filters:[usbIds[kind]]}) :
-      await navigator.serial.requestPort({filters:[serialIds[kind] ?? serialIds.ch552]})
+    const filterKind = isContactSwitch(kind) ? "toggle" : kind
+    const handle = usb ? await navigator.usb.requestDevice({filters:[usbIds[filterKind]]}) :
+      await navigator.serial.requestPort({filters:[serialIds[filterKind] ?? serialIds.ch552]})
     await attach(handle, usb, {requested:kind, target})
   } catch (err) { if (err.name !== "NotFoundError") el("notice").textContent = err.message }
 }
@@ -164,8 +169,18 @@ for (const key of Object.keys(localStorage).filter(k => k.startsWith(prefix))) {
 
 async function restore(handle, usb) {
   const info = usb ? handle : handle.getInfo()
+  // These switches share an identifier. Only restore a handle paired in this page.
+  const switchHandle = usb
+    ? info.vendorId === usbIds.toggle.vendorId && info.productId === usbIds.toggle.productId
+    : info.usbVendorId === serialIds.toggle.usbVendorId && info.usbProductId === serialIds.toggle.usbProductId
+  if (switchHandle) {
+    const target = cards.get(remembered.get(handle))
+    if (target && isContactSwitch(target.saved.kind) && !target.session && usesUsb(target.saved.kind) === usb)
+      await attach(handle, usb, {requested:target.saved.kind, target, restoring:true}).catch(() => {})
+    return
+  }
   const possible = [...cards.values()].some(c => {
-    if (c.session) return false
+    if (c.session || isContactSwitch(c.saved.kind)) return false
     if (usesUsb(c.saved.kind) !== usb) return false
     if (usb) return info.vendorId === usbIds[c.saved.kind].vendorId && info.productId === usbIds[c.saved.kind].productId
     const id = serialIds[c.saved.kind] ?? serialIds.ch552
@@ -177,6 +192,7 @@ for (const [api, usb] of [[navigator.serial,false],[navigator.usb,true]]) {
   if (!api) continue
   api.addEventListener("connect", e => restore(usb ? e.device : e.target, usb))
   api.addEventListener("disconnect", e => {
+    const filterKind = isContactSwitch(kind) ? "toggle" : kind
     const handle = usb ? e.device : e.target
     const card = cards.get(remembered.get(handle))
     if (card?.session?.handle === handle) void disconnect(card)
