@@ -18,6 +18,7 @@ export async function openToggle(handle) {
 export function startToggle(root, session, failed) {
   const panel = root.getElementById("toggle")
   const output = root.getElementById("switch-state")
+  root.getElementById("serial").hidden = true
   panel.hidden = false
   output.textContent = "Reading…"
   session.loop = (async () => {
