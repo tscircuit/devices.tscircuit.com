@@ -28,3 +28,5 @@ footer a { font-size: 14px; color: #465b73 }
 details { margin: 20px 0 }
 summary { cursor: pointer }
 .connection a, header a { color: #235cc0 }
+
+#history { display: block; width: 100%; height: 200px; margin-top: 12px }

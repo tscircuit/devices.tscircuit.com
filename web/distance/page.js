@@ -1,7 +1,10 @@
 import {DistanceSensor} from "./sensor.js"
 
+import {distanceHistory} from "./history.js"
+
 const el = id => document.getElementById(id)
 const connect = el("connect")
+const history = distanceHistory(el("history"))
 let session
 
 function resetReading() {
@@ -11,6 +14,7 @@ function resetReading() {
 
 function show({mm, status}) {
   const valid = status === 11
+  history.add(valid ? mm : null)
   el("distance").textContent = valid ? mm : "—"
   let quality = "Within working range"
   if (!valid) quality = "No valid return · sensor status " + status
@@ -59,6 +63,7 @@ connect.onclick = async () => {
   }
   try {
     const device = await navigator.usb.requestDevice({filters: [{vendorId: 0x1a86, productId: 0x5512}]})
+    history.reset()
     session = {device}
     el("state").textContent = "Identifying and initializing the sensor…"
     await run(session)
