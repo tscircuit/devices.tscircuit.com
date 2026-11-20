@@ -30,6 +30,9 @@ export function startSerial(root, s, failed) {
   }
   lock(false)
   el("serial").hidden = false
+  el("encoder").hidden = s.kind !== "encoder"
+  el("detents").textContent = "—"
+  el("push").textContent = ""
   el("pot").hidden = s.kind !== "potentiometer"
   el("position").textContent = "—"
   el("raw").textContent = ""
@@ -38,10 +41,16 @@ export function startSerial(root, s, failed) {
   log.textContent = ""
   record("DEVICE tscircuit " + s.kind + " " + s.version)
   s.onLine = line => {
-    if (s.kind === "potentiometer" && line.startsWith("{")) {
+    if ((s.kind === "encoder" || s.kind === "potentiometer") && line.startsWith("{")) {
       try {
         const v = JSON.parse(line)
-        if (v.module === "position" && v.max === 255 && Number.isInteger(v.raw) && v.raw >= 0 && v.raw <= 255) {
+        if (s.kind === "encoder" && v.module === "dial" && Number.isInteger(v.count) &&
+            v.count >= 0 && v.count <= 0xffffffff && (v.pressed === 0 || v.pressed === 1)) {
+          el("detents").textContent = v.count | 0 // Signed detents relative to power-up.
+          el("push").textContent = v.pressed ? "Button pressed" : "Button released"
+          return
+        }
+        if (s.kind === "potentiometer" && v.module === "position" && v.max === 255 && Number.isInteger(v.raw) && v.raw >= 0 && v.raw <= 255) {
           el("position").textContent = Math.round(v.raw * 100 / 255)
           el("meter").value = v.raw
           el("raw").textContent = "ADC " + v.raw + " / 255"

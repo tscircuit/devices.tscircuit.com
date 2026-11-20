@@ -2,6 +2,12 @@
 
 Open [devices.tscircuit.com](https://devices.tscircuit.com) in desktop Chrome or Edge. Choose **Add device**, pick the device type, then select the board in the browser picker. Each board has an independent card. Cards stay in this browser until removed, including when their boards are unplugged. Previously authorized, available devices reconnect on page load where the browser permits it. Use **Connect** on a saved card to choose its board again. Multiple saved boards of the same type may require manual selection after reload because the browser can omit unique serial numbers.
 
+## Rotary encoder
+
+Choose **Add device → Rotary encoder**. The EC11E dial reports signed detents relative to power-up and the debounced push-button state. Its CH552E samples quadrature A/B on P1.4/P1.6 and the button on P1.7 at 4 kHz. It supports `id`, `help`, `status`, and `led on|off`. The decoder and dial JSON report format are adapted from [basic-usbc-devices](https://github.com/tscircuit/basic-usbc-devices/tree/main/firmware/dial).
+
+Build with the same CH552E settings as the potentiometer, using the `firmware/encoder` sketch. Flash `firmware/releases/encoder-1.0.0.hex` in WCH bootloader mode.
+
 ## Potentiometer
 
 Choose **Add device → Potentiometer**. The CH552E measures the 10 kΩ linear pot on P1.4 and reports its eight-sample averaged 8-bit ADC value and normalized percentage. The serial protocol provides `id`, `help`, `status`, `led on` and `led off`. Readings are streamed as JSON compatible with the board's position reader.

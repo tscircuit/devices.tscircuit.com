@@ -3,7 +3,7 @@ import {identifySerial} from "./serial.js"
 import {startRanging, startSerial} from "./device-controls.js"
 
 const names = {
-  potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
+  encoder: "Rotary encoder", potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
   buzzer: "Buzzer", resetter: "USB resetter"
 }
 const serialIds = {
