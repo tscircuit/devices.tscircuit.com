@@ -2,6 +2,14 @@
 
 Open [devices.tscircuit.com](https://devices.tscircuit.com) in desktop Chrome or Edge. Plug in a board, click **Connect device**, and select **tscircuit Buzzer**. The page queries its identity and shows the matching controls. The buzzer has a fixed pitch of approximately 2.8 kHz.
 
+## Flex display
+
+With power disconnected, seat the non-touch BuyDisplay ER-TFT035IPS-6 ribbon in the matching 50-pin connector. On the [device console](https://devices.tscircuit.com), select **Connect device → tscircuit Flex Display**. Choose **Test pattern**, or select a local image or browser-supported video. Media is decoded in your browser and letterboxed on the panel. Still images use 480 × 320 RGB565. Video samples the current playback position after each acknowledged frame and expands 120 × 80 RGB565 to the full panel, without audio. Stop video leaves the last complete frame displayed.
+
+The CH552T adapter runs CH55xDuino 0.0.26 at 16 MHz. To rebuild with the same core as the buzzer, use `arduino-cli compile --fqbn CH55xDuino:mcs51:ch552:clock=16internal,usb_settings=user148,bootloader_pin=p36 --output-dir build/display firmware/display`. Flash `firmware/releases/display-1.0.0.hex` with wchisp in WCH bootloader mode. Panel wiring, LCD initialization and legacy framed CDC commands are based on [basic-usbc-devices](https://github.com/tscircuit/basic-usbc-devices/tree/main/firmware/display).
+
+Serial commands include `id`, `help`, and `init`. After `OK init`, send `image` or `video` followed by LF. Wait for `READY`, send exactly 307200 or 19200 bytes respectively (big-endian RGB565 in row order), then wait for `OK frame` before the next command. The backlight turns on after the first complete frame.
+
 ## USB resetter
 
 Connect the control port, click **Connect device**, and choose **tscircuit USB Resetter**. The serial console supports `id`, `help`, `status`, `off`, `on`, `cycle [seconds]` (alias `reset`), and `led on|off|auto`. A cycle defaults to one second and restores output on the board's timer. Explicit on/off commands cancel a pending cycle. Power passthrough starts enabled and the RGB indicator starts off. The separate passthrough input powers the downstream load. Status reports the switch command and both sensed voltages.

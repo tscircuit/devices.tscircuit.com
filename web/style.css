@@ -30,3 +30,7 @@ summary { cursor: pointer }
 .connection a, header a { color: #235cc0 }
 
 #history { display: block; width: 100%; height: 200px; margin-top: 12px }
+
+#screen { display: block; width: min(100%, 480px); height: auto; background: #151f2b; margin: 16px 0; image-rendering: pixelated }
+.media-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: 12px }
+.media-controls input { width: min(100%, 285px); font-size: 14px }

@@ -1,3 +1,4 @@
+import {enableDisplay, hideDisplay} from "./display/player.js"
 const el = id => document.getElementById(id)
 const connect = el("connect")
 const state = el("state")
@@ -26,9 +27,30 @@ async function send(command) {
   }
 }
 
+async function displayExchange(session, data, expected) {
+  if (current !== session || session.closing) throw new Error("Display disconnected.")
+  let timer
+  const ack = new Promise((resolve, reject) => {
+    session.ack = {expected, resolve, reject}
+    timer = setTimeout(() => reject(new Error("Display response timed out. Reconnect the display.")), 15000)
+  })
+  try {
+    const bytes = typeof data === "string" ? new TextEncoder().encode(data + "\n") : data
+    await Promise.all([session.writer.write(bytes), ack])
+  } catch (err) {
+    void close(session, err.message)
+    throw err
+  } finally {
+    clearTimeout(timer)
+    session.ack = undefined
+  }
+}
+
 async function close(session, message) {
   if (!session || session.closing) return
   session.closing = true
+  session.ack?.reject(new Error("Display disconnected."))
+  hideDisplay()
   clearTimeout(session.timer)
   connect.disabled = true
   controls(false)
@@ -57,6 +79,11 @@ async function read(session) {
       pending = lines.pop().slice(-2048)
       for (const raw of lines) {
         const line = raw.trimEnd()
+        if (session.ack) {
+          if (line === session.ack.expected) session.ack.resolve()
+          else session.ack.reject(new Error("Unexpected display response: " + line))
+          continue
+        }
         record(line)
         const match = /^DEVICE tscircuit ([\w-]+) ([\w.-]+)$/.exec(line)
         if (match) {
@@ -65,6 +92,13 @@ async function read(session) {
           state.textContent = "Connected · Firmware " + match[2]
           el("rate-field").hidden = !/^1\.([1-9]\d*)\./.test(match[2])
           el("buzzer").hidden = match[1] !== "buzzer"
+          if (match[1] === "display") enableDisplay(
+            (data, expected) => displayExchange(session, data, expected),
+            locked => {
+              el("command").disabled = el("send").disabled = locked
+              document.querySelector("[data-command=help]").disabled = locked
+            }
+          )
         }
       }
     }
