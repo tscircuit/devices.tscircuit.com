@@ -41,7 +41,30 @@ static void pixels(uint8_t b) {
       }
     }
   }
-  if (--remaining == 0) { P3_4 = 1; say("OK frame"); }
+  if (--remaining == 0) { frameVisible = 1; driveBacklight(brightness); say("OK frame"); }
+}
+static void brightnessCommand(void) {
+  uint16_t value = 0;
+  uint8_t i;
+  if (line[10]) {
+    if (line[10] != ' ' || !line[11]) { say("ERR brightness 0-100"); return; }
+    for (i = 11; line[i]; i++) {
+      if (line[i] < '0' || line[i] > '9') { say("ERR brightness 0-100"); return; }
+      value = value * 10 + line[i] - '0';
+      if (value > 100) { say("ERR brightness 0-100"); return; }
+    }
+    brightness = value;
+    if (frameVisible) driveBacklight(brightness);
+  }
+  {
+    const char *prefix = "BRIGHTNESS ";
+    while (*prefix) USBSerial_write(*prefix++);
+  }
+  if (brightness == 100) USBSerial_write('1');
+  if (brightness >= 10) USBSerial_write('0' + (brightness / 10) % 10);
+  USBSerial_write('0' + brightness % 10);
+  USBSerial_write('\n');
+  USBSerial_flush();
 }
 static void textByte(uint8_t b) {
   if (b != '\r' && b != '\n') {
@@ -52,8 +75,9 @@ static void textByte(uint8_t b) {
   if (!used && !overflow) return;
   line[used] = 0;
   if (overflow) say("ERR invalid command");
-  else if (!strcmp(line, "id")) say("DEVICE tscircuit display 1.0.0");
-  else if (!strcmp(line, "help")) say("id | init | image (480x320 RGB565 BE) | video (120x80 RGB565 BE); wait READY then send pixels");
+  else if (!strcmp(line, "id")) say("DEVICE tscircuit display 1.1.0");
+  else if (!strcmp(line, "help")) say("id | init | brightness [0-100] | image (480x320 RGB565 BE) | video (120x80 RGB565 BE); wait READY then send pixels");
+  else if (!strncmp(line, "brightness", 10)) brightnessCommand();
   else if (!strcmp(line, "init")) { initPanel(); say("OK init"); }
   else if (!strcmp(line, "image") || !strcmp(line, "video")) {
     if (sleeping) say("ERR init required");

@@ -34,3 +34,7 @@ summary { cursor: pointer }
 #screen { display: block; width: min(100%, 480px); height: auto; background: #151f2b; margin: 16px 0; image-rendering: pixelated }
 .media-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: 12px }
 .media-controls input { width: min(100%, 285px); font-size: 14px }
+
+#brightness-control { margin: 0 0 16px }
+#brightness { display: block; width: min(100%, 320px); padding: 0; accent-color: #235cc0 }
+#brightness-value { font-variant-numeric: tabular-nums }

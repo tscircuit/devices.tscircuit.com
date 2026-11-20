@@ -36,13 +36,44 @@ function draw(source, width, height) {
   return bytes
 }
 
-export function enableDisplay(exchange, busy) {
+export function reportBrightness(level) {
+  if (!active || active.pending != null) return
+  el("brightness").value = level
+  el("brightness-value").textContent = level + "%"
+}
+
+export function enableDisplay(exchange, busy, writeCommand, version) {
   if (active) return
   const player = active = {stopped: false}
   el("display").hidden = false
   const file = el("media-file")
   const pattern = el("pattern")
   const stop = el("video-stop")
+  const [major, minor] = version.split(".").map(Number)
+  const supportsBrightness = major > 1 || major === 1 && minor >= 1
+  el("brightness-control").hidden = !supportsBrightness
+  const slider = el("brightness")
+  slider.oninput = () => {
+    el("brightness-value").textContent = slider.value + "%"
+    player.pending = slider.value
+    if (!player.streaming) scheduleBrightness()
+  }
+  // Coalesce pointer events. During media playback send only between whole frames.
+  function scheduleBrightness() {
+    if (player.scheduled) return
+    player.scheduled = true
+    requestAnimationFrame(() => {
+      player.scheduled = false
+      if (active === player && !player.streaming) flushBrightness()
+    })
+  }
+  function flushBrightness() {
+    if (player.pending == null) return
+    const value = player.pending
+    player.pending = null
+    return writeCommand("brightness " + value)
+  }
+  if (supportsBrightness) writeCommand("brightness")
   file.value = ""
   file.disabled = pattern.disabled = false
   stop.disabled = true
@@ -50,6 +81,7 @@ export function enableDisplay(exchange, busy) {
   el("media-state").textContent = "Choose an image or video, or send the test pattern."
   async function play(media) {
     if (active !== player || file.disabled) return
+    player.streaming = true
     busy(true)
     file.disabled = pattern.disabled = true
     player.stopped = false
@@ -80,6 +112,7 @@ export function enableDisplay(exchange, busy) {
         el("media-state").textContent = video ? "Playing · frame " + (count + 1) : "Sending image…"
         await exchange(video ? "video" : "image", "READY")
         await exchange(pixels, "OK frame")
+        await flushBrightness()
         count++
       } while (video && !video.ended)
       if (active === player) el("media-state").textContent = video ? count + " video frames sent." : "Image sent to display."
@@ -92,6 +125,8 @@ export function enableDisplay(exchange, busy) {
       if (active === player) {
         file.disabled = pattern.disabled = false
         stop.disabled = true
+        player.streaming = false
+        scheduleBrightness()
         busy(false)
       }
     }

@@ -1,4 +1,4 @@
-import {enableDisplay, hideDisplay} from "./display/player.js"
+import {enableDisplay, hideDisplay, reportBrightness} from "./display/player.js"
 const el = id => document.getElementById(id)
 const connect = el("connect")
 const state = el("state")
@@ -79,6 +79,11 @@ async function read(session) {
       pending = lines.pop().slice(-2048)
       for (const raw of lines) {
         const line = raw.trimEnd()
+        const level = /^BRIGHTNESS (\d{1,3})$/.exec(line)
+        if (level) {
+          reportBrightness(level[1])
+          continue
+        }
         if (session.ack) {
           if (line === session.ack.expected) session.ack.resolve()
           else session.ack.reject(new Error("Unexpected display response: " + line))
@@ -97,7 +102,8 @@ async function read(session) {
             locked => {
               el("command").disabled = el("send").disabled = locked
               document.querySelector("[data-command=help]").disabled = locked
-            }
+            },
+            command => send(command), match[2]
           )
         }
       }

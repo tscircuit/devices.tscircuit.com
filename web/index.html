@@ -11,6 +11,8 @@
 <section class="connection"><div><h2 id="device">Serial device</h2><p id="state" role="status">Connect a tscircuit USB device to get started.</p></div><button id="connect">Connect device</button></section>
 <section id="display" hidden><div class="heading"><h2>Flex display</h2><small>ER-TFT035IPS-6 · 480 × 320</small></div>
 <canvas id="screen" width="480" height="320" aria-label="Preview of the frame sent to the display"></canvas>
+<div id="brightness-control" hidden><label for="brightness">Brightness</label> <output id="brightness-value" for="brightness">100%</output>
+<input type="range" id="brightness" min="0" max="100" value="100"></div>
 <div class="media-controls"><label>Image or video <input id="media-file" type="file" accept="image/*,video/*"></label>
 <button id="pattern">Test pattern</button><button id="video-stop" disabled>Stop video</button></div>
 <p id="media-state" role="status"></p></section>
