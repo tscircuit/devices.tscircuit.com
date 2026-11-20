@@ -79,7 +79,10 @@ connect.onclick = async () => {
   if (current) return close(current, "Disconnected.")
   connect.disabled = true
   try {
-    const port = await navigator.serial.requestPort({filters: [{usbVendorId: 0x1209, usbProductId: 0xc550}]})
+    const port = await navigator.serial.requestPort({filters: [
+      {usbVendorId: 0x1209, usbProductId: 0xc550},
+      {usbVendorId: 0x2e8a, usbProductId: 0x000a}
+    ]})
     await port.open({baudRate: 115200})
     const session = current = {port}
     await port.setSignals({dataTerminalReady: true})

@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.13)
+include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
+project(resetter C CXX ASM)
+pico_sdk_init()
+add_executable(resetter main.c usb.c)
+target_link_libraries(resetter pico_stdlib hardware_adc pico_status_led pico_unique_id)
+target_compile_definitions(resetter PRIVATE PICO_DEFAULT_WS2812_PIN=29 PICO_STATUS_LED_AVAILABLE=0
+  PICO_STDIO_USB_USE_DEFAULT_DESCRIPTORS=0 PICO_ENABLE_USB_RESET_VIA_VENDOR_INTERFACE=0)
+pico_enable_stdio_usb(resetter 1)
+pico_enable_stdio_uart(resetter 0)
+pico_set_program_name(resetter "tscircuit USB resetter")
+pico_set_program_version(resetter "1.0.0")
+pico_add_extra_outputs(resetter)

@@ -2,6 +2,12 @@
 
 Open [devices.tscircuit.com](https://devices.tscircuit.com) in desktop Chrome or Edge. Plug in a board, click **Connect device**, and select **tscircuit Buzzer**. The page queries its identity and shows the matching controls. The buzzer has a fixed pitch of approximately 2.8 kHz.
 
+## USB resetter
+
+Connect the control port, click **Connect device**, and choose **tscircuit USB Resetter**. The serial console supports `id`, `help`, `status`, `off`, `on`, `cycle [seconds]` (alias `reset`), and `led on|off|auto`. A cycle defaults to one second and restores output on the board's timer. Explicit on/off commands cancel a pending cycle. Power passthrough starts enabled and the RGB indicator starts off. The separate passthrough input powers the downstream load. Status reports the switch command and both sensed voltages.
+
+To reflash, connect the control port in BOOTSEL mode and copy `firmware/releases/resetter-1.0.0.uf2` to RPI-RP2. To rebuild, set `PICO_SDK_PATH` to Raspberry Pi Pico SDK 2.3.1 (with submodules), then run `cmake -S firmware/resetter -B build/resetter -DPICO_BOARD=pico` and `cmake --build build/resetter`.
+
 ## Distance sensor
 
 Open the [distance sensor page](https://devices.tscircuit.com/distance/) in desktop Chrome or Edge, choose **Connect sensor**, then select the CH341 adapter. The board uses a fixed-function CH341T bridge (1a86:5512). Its WebUSB driver probes the VL53L0X model ID at I²C address 0x29, configures the reference SPADs, performs reference calibrations and requests individual measurements. Configuration is applied each connection. There is no flashable MCU on this board.
