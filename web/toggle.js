@@ -1,13 +1,24 @@
-export async function openToggle(handle) {
-  await handle.open({baudRate:9600, flowControl:"none"})
+async function readUsbSwitch(handle) {
+  // CH340 modem status registers, with active-low CTS in bit 0.
+  const result = await handle.controlTransferIn({
+    requestType:"vendor", recipient:"device", request:0x95, value:0x0706, index:0
+  }, 2)
+  if (result.status !== "ok" || result.data?.byteLength !== 2) throw Error("Switch status read failed")
+  return (result.data.getUint8(0) & 1) === 0
+}
+
+export async function openToggle(handle, usb = false) {
+  const readSwitch = usb ? () => readUsbSwitch(handle) : async () => (await handle.getSignals()).clearToSend
+  if (usb) await handle.open()
+  else await handle.open({baudRate:9600, flowControl:"none"})
   try {
-    await handle.setSignals({dataTerminalReady:false})
-    await handle.getSignals()
+    if (!usb) await handle.setSignals({dataTerminalReady:false})
+    await readSwitch()
   } catch (err) {
     await handle.close().catch(() => {})
     throw err
   }
-  const session = {handle, kind:"toggle", async close() {
+  const session = {handle, readSwitch, kind:"toggle", async close() {
     session.stopped = true
     await session.loop
     await handle.close().catch(() => {})
@@ -24,7 +35,7 @@ export function startToggle(root, session, failed) {
   session.loop = (async () => {
     let candidate, since
     while (!session.stopped) {
-      const {clearToSend} = await session.handle.getSignals()
+      const clearToSend = await session.readSwitch()
       if (typeof clearToSend !== "boolean") throw Error("Switch signal unavailable")
       const now = performance.now()
       if (clearToSend !== candidate) {
