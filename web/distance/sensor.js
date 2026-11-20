@@ -9,7 +9,7 @@ export class DistanceSensor {
   async packet(bytes) {
     const result = await this.device.transferOut(2, Uint8Array.from(bytes))
     if (result.status !== "ok" || result.bytesWritten !== bytes.length)
-      throw new Error("Incomplete CH341T USB write.")
+      throw new Error("Could not send the full request to the distance sensor.")
   }
 
   async write(register, ...values) {
@@ -21,7 +21,7 @@ export class DistanceSensor {
     const ack = count > 1 ? [0xc0 | (count - 1)] : []
     await this.packet([0xaa, 0x74, 0x82, 0x52, register, 0x74, 0x81, 0x53, ...ack, 0xc0, 0x75, 0])
     const {status, data} = await this.device.transferIn(2, count)
-    if (status !== "ok" || data?.byteLength !== count) throw new Error("Incomplete CH341T USB read.")
+    if (status !== "ok" || data?.byteLength !== count) throw new Error("The distance sensor returned an incomplete reading.")
     return new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
   }
 
@@ -37,14 +37,14 @@ export class DistanceSensor {
       if (Boolean((await this.byte(register)) & mask) === wantSet) return
       await delay(5)
     } while (performance.now() < deadline)
-    throw new Error("VL53L0X timed out. Reconnect the board and try again.")
+    throw new Error("The distance sensor timed out. Reconnect the board and try again.")
   }
 
   // Initialization and reference SPAD calibration adapted from Pololu's
   // VL53L0X driver (9f3773c). See LICENSE-vl53l0x.txt for Pololu and ST notices.
   async initialize() {
     await this.packet([0xaa, 0x61, 0]) // standard-mode I²C
-    if (await this.byte(0xc0) !== 0xee) throw new Error("No VL53L0X identified on this adapter.")
+    if (await this.byte(0xc0) !== 0xee) throw new Error("Could not detect the distance sensor.")
     await this.write(0x89, (await this.byte(0x89)) | 1)
     await this.sequence([[0x88,0], [0x80,1], [0xff,1], [0,0]])
     this.stopVariable = await this.byte(0x91)

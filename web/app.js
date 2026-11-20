@@ -123,7 +123,7 @@ async function attach(handle, usb, {requested, target, restoring = false} = {}) 
     const failed = err => { if (card.session === session) void disconnect(card, err) }
     session.onEnd = failed
     const r = card.root
-    r.getElementById("state").textContent = kind === "distance" ? "Connected · VL53L0X" : kind === "toggle" ? "Connected · CH340C" : "Connected · Firmware " + session.version
+    r.getElementById("state").textContent = session.version ? "Connected · Firmware " + session.version : "Connected"
     r.getElementById("reconnect").textContent = "Disconnect"
     r.getElementById("live").hidden = false
     card.cleanup = kind === "distance" ? startRanging(r,session,failed) : kind === "toggle" ? startToggle(r,session,failed) : startSerial(r,session,failed)
