@@ -1,10 +1,16 @@
 # tscircuit USB devices
 
-Open [devices.tscircuit.com](https://devices.tscircuit.com) in desktop Chrome or Edge. Plug in a board, click **Connect device**, and select **tscircuit Buzzer**. The page queries its identity and shows the matching controls. The buzzer has a fixed pitch of approximately 2.8 kHz.
+Open [devices.tscircuit.com](https://devices.tscircuit.com) in desktop Chrome or Edge. Choose **Add device**, pick the device type, then select the board in the browser picker. Each board has an independent card. Cards stay in this browser until removed, including when their boards are unplugged. Previously authorized, available devices reconnect on page load where the browser permits it. Use **Connect** on a saved card to choose its board again. Multiple saved boards of the same type may require manual selection after reload because the browser can omit unique serial numbers.
+
+## Potentiometer
+
+Choose **Add device → Potentiometer**. The CH552E measures the 10 kΩ linear pot on P1.4 and reports its eight-sample averaged 8-bit ADC value and normalized percentage. The serial protocol provides `id`, `help`, `status`, `led on` and `led off`. Readings are streamed as JSON compatible with the board's position reader.
+
+Build with CH55xDuino 0.0.26 using `arduino-cli compile --fqbn CH55xDuino:mcs51:ch552:clock=24internal,usb_settings=user148,bootloader_pin=p36 --output-dir build/potentiometer firmware/potentiometer`. Flash `firmware/releases/potentiometer-1.0.0.hex` in WCH bootloader mode.
 
 ## Flex display
 
-With power disconnected, seat the non-touch BuyDisplay ER-TFT035IPS-6 ribbon in the matching 50-pin connector. On the [device console](https://devices.tscircuit.com), select **Connect device → tscircuit Flex Display**. Choose **Test pattern**, or select a local image or browser-supported video. Media is decoded in your browser and letterboxed on the panel. Still images use 480 × 320 RGB565. Video samples the current playback position after each acknowledged frame and expands 120 × 80 RGB565 to the full panel, without audio. Stop video leaves the last complete frame displayed. Firmware 1.1.0 supports a 0–100% hardware backlight slider, including during playback. The serial command `brightness` reads the setting and `brightness 50` sets 50%.
+With power disconnected, seat the non-touch BuyDisplay ER-TFT035IPS-6 ribbon in the matching 50-pin connector. On the [device console](https://devices.tscircuit.com), select **Add device → Flex display**. Choose **Test pattern**, or select a local image or browser-supported video. Media is decoded in your browser and letterboxed on the panel. Still images use 480 × 320 RGB565. Video samples the current playback position after each acknowledged frame and expands 120 × 80 RGB565 to the full panel, without audio. Stop video leaves the last complete frame displayed. Firmware 1.1.0 supports a 0–100% hardware backlight slider, including during playback. The serial command `brightness` reads the setting and `brightness 50` sets 50%.
 
 The CH552T adapter runs CH55xDuino 0.0.26 at 16 MHz. To rebuild with the same core as the buzzer, use `arduino-cli compile --fqbn CH55xDuino:mcs51:ch552:clock=16internal,usb_settings=user148,bootloader_pin=p36 --output-dir build/display firmware/display`. Flash `firmware/releases/display-1.1.0.hex` with wchisp in WCH bootloader mode. Panel wiring, LCD initialization and legacy framed CDC commands are based on [basic-usbc-devices](https://github.com/tscircuit/basic-usbc-devices/tree/main/firmware/display).
 
@@ -12,13 +18,13 @@ Serial commands include `id`, `help`, and `init`. After `OK init`, send `image` 
 
 ## USB resetter
 
-Connect the control port, click **Connect device**, and choose **tscircuit USB Resetter**. The serial console supports `id`, `help`, `status`, `off`, `on`, `cycle [seconds]` (alias `reset`), and `led on|off|auto`. A cycle defaults to one second and restores output on the board's timer. Explicit on/off commands cancel a pending cycle. Power passthrough starts enabled and the RGB indicator starts off. The separate passthrough input powers the downstream load. Status reports the switch command and both sensed voltages.
+Connect the control port, choose **Add device → USB resetter**, and select the board. The serial console supports `id`, `help`, `status`, `off`, `on`, `cycle [seconds]` (alias `reset`), and `led on|off|auto`. A cycle defaults to one second and restores output on the board's timer. Explicit on/off commands cancel a pending cycle. Power passthrough starts enabled and the RGB indicator starts off. The separate passthrough input powers the downstream load. Status reports the switch command and both sensed voltages.
 
 To reflash, connect the control port in BOOTSEL mode and copy `firmware/releases/resetter-1.0.0.uf2` to RPI-RP2. To rebuild, set `PICO_SDK_PATH` to Raspberry Pi Pico SDK 2.3.1 (with submodules), then run `cmake -S firmware/resetter -B build/resetter -DPICO_BOARD=pico` and `cmake --build build/resetter`.
 
 ## Distance sensor
 
-Open the [distance sensor page](https://devices.tscircuit.com/distance/) in desktop Chrome or Edge, choose **Connect sensor**, then select the CH341 adapter. The board uses a fixed-function CH341T bridge (1a86:5512). Its WebUSB driver probes the VL53L0X model ID at I²C address 0x29, configures the reference SPADs, performs reference calibrations and requests individual measurements. Configuration is applied each connection. There is no flashable MCU on this board.
+Choose **Add device → Distance sensor** and select the CH341 adapter. Its live reading and graph appear alongside the other devices. The board uses a fixed-function CH341T bridge (1a86:5512). Its WebUSB driver probes the VL53L0X model ID at I²C address 0x29, configures the reference SPADs, performs reference calibrations and requests individual measurements. Configuration is applied each connection. There is no flashable MCU on this board.
 
 The page shows millimeters for completed measurements (device status 11) and flags results outside the board’s 30–300 mm working window. Invalid results clear the numeric display. See **Sensor help** on the page for usage. The driver and its third-party notices are in `web/distance/`.
 

@@ -1,162 +1,173 @@
-import {enableDisplay, hideDisplay, reportBrightness} from "./display/player.js"
+import {DistanceSensor} from "./distance/sensor.js"
+import {identifySerial} from "./serial.js"
+import {startRanging, startSerial} from "./device-controls.js"
+
+const names = {
+  potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
+  buzzer: "Buzzer", resetter: "USB resetter"
+}
+const serialIds = {
+  ch552: {usbVendorId: 0x1209, usbProductId: 0xc550},
+  resetter: {usbVendorId: 0x2e8a, usbProductId: 0x000a}
+}
+const usbId = {vendorId: 0x1a86, productId: 0x5512}
+const cards = new Map()
+const claimed = new Set()
+const remembered = new WeakMap()
+const prefix = "tscircuit.device."
 const el = id => document.getElementById(id)
-const connect = el("connect")
-const state = el("state")
-const log = el("log")
-let current
+const picker = el("picker")
 
-function record(line) {
-  log.textContent = (log.textContent + line + "\n").slice(-12000)
-  log.scrollTop = log.scrollHeight
+function cardFor(saved) {
+  const host = document.createElement("div")
+  host.className = "device-card"
+  const root = host.attachShadow({mode:"open"})
+  root.append(el("card").content.cloneNode(true))
+  const card = {saved, host, root}
+  cards.set(saved.id, card)
+  root.getElementById("name").textContent = saved.name
+  root.getElementById("reconnect").onclick = () => card.session ? disconnect(card) : choose(saved.kind, card)
+  root.getElementById("remove").onclick = async () => {
+    cards.delete(saved.id)
+    localStorage.removeItem(prefix + saved.id)
+    host.remove()
+    el("empty").hidden = cards.size > 0
+    await disconnect(card)
+  }
+  el("devices").append(host)
+  el("empty").hidden = true
+  return card
 }
 
-function controls(connected) {
-  el("command").disabled = el("send").disabled = !connected
-  document.querySelector("[data-command=help]").disabled = !connected
-  connect.textContent = connected ? "Disconnect" : "Connect device"
-}
-
-async function send(command) {
-  const session = current
-  if (!session?.writer || session.closing) return
-  try {
-    await session.writer.write(new TextEncoder().encode(command + "\n"))
-    record("> " + command)
-  } catch (err) {
-    await close(session, err.message)
+async function disconnect(card, error) {
+  const s = card.session
+  if (!s) return
+  card.session = null
+  card.cleanup?.()
+  card.cleanup = null
+  card.root.getElementById("live").hidden = true
+  const button = card.root.getElementById("reconnect")
+  button.disabled = true
+  try { await s.close() } finally {
+    claimed.delete(s.handle)
+    button.disabled = false
+    button.textContent = "Connect"
+    card.root.getElementById("state").textContent = error ? "Disconnected · " + error.message : "Disconnected"
   }
 }
 
-async function displayExchange(session, data, expected) {
-  if (current !== session || session.closing) throw new Error("Display disconnected.")
-  let timer
-  const ack = new Promise((resolve, reject) => {
-    session.ack = {expected, resolve, reject}
-    timer = setTimeout(() => reject(new Error("Display response timed out. Reconnect the display.")), 15000)
-  })
+async function openDevice(handle, usb) {
+  if (!usb) return Object.assign(await identifySerial(handle), {handle})
+  await handle.open()
   try {
-    const bytes = typeof data === "string" ? new TextEncoder().encode(data + "\n") : data
-    await Promise.all([session.writer.write(bytes), ack])
+    await handle.selectConfiguration(1)
+    await handle.claimInterface(0)
+    const sensor = new DistanceSensor(handle)
+    await sensor.initialize()
+    const s = {handle, sensor, kind:"distance", async close() {
+      s.stopped = true
+      await s.loop
+      await handle.close().catch(() => {})
+    }}
+    return s
   } catch (err) {
-    void close(session, err.message)
+    await handle.close().catch(() => {})
     throw err
-  } finally {
-    clearTimeout(timer)
-    session.ack = undefined
   }
 }
 
-async function close(session, message) {
-  if (!session || session.closing) return
-  session.closing = true
-  session.ack?.reject(new Error("Display disconnected."))
-  hideDisplay()
-  clearTimeout(session.timer)
-  connect.disabled = true
-  controls(false)
-  el("buzzer").hidden = true
+async function attach(handle, usb, {requested, target, restoring = false} = {}) {
+  if (claimed.has(handle)) {
+    if (!restoring) el("notice").textContent = "That device is already connected or connecting."
+    return
+  }
+  claimed.add(handle)
+  let session, attached = false
   try {
-    await session.reader?.cancel()
-    await session.readTask
-  } catch (err) { record(err.message) }
-  session.writer?.releaseLock()
-  try { await session.port.close() } catch (err) { record(err.message) }
-  current = undefined
-  el("device").textContent = "Select a device"
-  state.textContent = message
-  connect.disabled = false
-}
-
-async function read(session) {
-  const decoder = new TextDecoder()
-  let pending = ""
-  try {
-    while (!session.closing) {
-      const { value, done } = await session.reader.read()
-      if (done) break
-      pending += decoder.decode(value, {stream: true})
-      const lines = pending.split("\n")
-      pending = lines.pop().slice(-2048)
-      for (const raw of lines) {
-        const line = raw.trimEnd()
-        const level = /^BRIGHTNESS (\d{1,3})$/.exec(line)
-        if (level) {
-          reportBrightness(level[1])
-          continue
-        }
-        if (session.ack) {
-          if (line === session.ack.expected) session.ack.resolve()
-          else session.ack.reject(new Error("Unexpected display response: " + line))
-          continue
-        }
-        record(line)
-        const match = /^DEVICE tscircuit ([\w-]+) ([\w.-]+)$/.exec(line)
-        if (match) {
-          clearTimeout(session.timer)
-          el("device").textContent = "tscircuit " + match[1]
-          state.textContent = "Connected · Firmware " + match[2]
-          el("rate-field").hidden = !/^1\.([1-9]\d*)\./.test(match[2])
-          el("buzzer").hidden = match[1] !== "buzzer"
-          if (match[1] === "display") enableDisplay(
-            (data, expected) => displayExchange(session, data, expected),
-            locked => {
-              el("command").disabled = el("send").disabled = locked
-              document.querySelector("[data-command=help]").disabled = locked
-            },
-            command => send(command), match[2]
-          )
-        }
-      }
+    session = await openDevice(handle, usb)
+    const kind = session.kind
+    if (!Object.hasOwn(names, kind)) throw Error("Unrecognized device identity.")
+    if (requested && requested !== kind) throw Error("Selected " + names[kind] + ". Choose " + names[requested] + " instead.")
+    if (target && !cards.has(target.saved.id)) return
+    let card = target || cards.get(remembered.get(handle))
+    if (restoring && !card) {
+      const matches = [...cards.values()].filter(c => c.saved.kind === kind)
+      // Identical USB bridges can lack a unique serial number. Never guess between cards.
+      if (matches.length !== 1) return
+      card = matches[0]
     }
-  } catch (err) { record(err.message) }
-  finally {
-    session.reader.releaseLock()
-    if (!session.closing) queueMicrotask(() => close(session, "Device disconnected."))
+    if (card?.session || session.ended) return
+    if (!card) {
+      const taken = new Set([...cards.values()].map(c => c.saved.name))
+      let name = names[kind]
+      for (let i = 2; taken.has(name); i++) name = names[kind] + " " + i
+      const saved = {id:crypto.randomUUID(), kind, name}
+      localStorage.setItem(prefix + saved.id, JSON.stringify(saved))
+      card = cardFor(saved)
+    }
+    remembered.set(handle, card.saved.id)
+    card.session = session
+    const failed = err => { if (card.session === session) void disconnect(card, err) }
+    session.onEnd = failed
+    const r = card.root
+    r.getElementById("state").textContent = usb ? "Connected · VL53L0X" : "Connected · Firmware " + session.version
+    r.getElementById("reconnect").textContent = "Disconnect"
+    r.getElementById("live").hidden = false
+    card.cleanup = usb ? startRanging(r,session,failed) : startSerial(r,session,failed)
+    attached = true
+  } finally {
+    if (!attached) {
+      if (session) await session.close()
+      claimed.delete(handle)
+    }
   }
 }
 
-connect.onclick = async () => {
-  if (current) return close(current, "Disconnected.")
-  connect.disabled = true
+async function choose(kind, target) {
+  picker.close()
+  el("notice").textContent = ""
+  const usb = kind === "distance"
   try {
-    const port = await navigator.serial.requestPort({filters: [
-      {usbVendorId: 0x1209, usbProductId: 0xc550},
-      {usbVendorId: 0x2e8a, usbProductId: 0x000a}
-    ]})
-    await port.open({baudRate: 115200})
-    const session = current = {port}
-    await port.setSignals({dataTerminalReady: true})
-    session.writer = port.writable.getWriter()
-    session.reader = port.readable.getReader()
-    log.textContent = ""
-    state.textContent = "Identifying device…"
-    controls(true)
-    session.readTask = read(session)
-    session.timer = setTimeout(() => { state.textContent = "Connected · No device identity received." }, 2000)
-    await send("id")
-  } catch (err) {
-    const message = err.name === "NotFoundError" ? "No device selected." : err.message
-    if (current) await close(current, message)
-    else state.textContent = message
-  } finally { connect.disabled = false }
+    if (!(usb ? navigator.usb : navigator.serial)) throw Error("Open this page in desktop Chrome or Edge to connect this device.")
+    const handle = usb ? await navigator.usb.requestDevice({filters:[usbId]}) :
+      await navigator.serial.requestPort({filters:[kind === "resetter" ? serialIds.resetter : serialIds.ch552]})
+    await attach(handle, usb, {requested:kind, target})
+  } catch (err) { if (err.name !== "NotFoundError") el("notice").textContent = err.message }
 }
 
-el("play").onsubmit = event => {
-  event.preventDefault()
-  const ms = el("duration").valueAsNumber
-  const hz = el("rate").valueAsNumber
-  send(!el("rate-field").hidden && hz && ms ? `tone ${hz} ${ms}` : `beep ${ms}`)
+for (const [kind, name] of Object.entries(names)) {
+  const choice = document.createElement("button")
+  choice.textContent = name
+  choice.onclick = () => choose(kind)
+  el("choices").append(choice)
 }
-el("terminal").onsubmit = event => {
-  event.preventDefault()
-  const input = el("command")
-  if (input.value.trim()) send(input.value.trim())
-  input.value = ""
+el("add").onclick = () => picker.showModal()
+for (const key of Object.keys(localStorage).filter(k => k.startsWith(prefix))) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(key))
+    if (key === prefix + saved.id && Object.hasOwn(names,saved.kind) && typeof saved.name === "string") cardFor(saved)
+  } catch {}
 }
-for (const button of document.querySelectorAll("[data-command]"))
-  button.onclick = () => send(button.dataset.command)
 
-if (!navigator.serial) {
-  connect.disabled = true
-  state.textContent = "Open this page in desktop Chrome or Edge to use Web Serial."
+async function restore(handle, usb) {
+  const info = usb ? handle : handle.getInfo()
+  const possible = [...cards.values()].some(c => {
+    if (c.session) return false
+    if (usb) return c.saved.kind === "distance" && info.vendorId === usbId.vendorId && info.productId === usbId.productId
+    const id = c.saved.kind === "resetter" ? serialIds.resetter : serialIds.ch552
+    return c.saved.kind !== "distance" && info.usbVendorId === id.usbVendorId && info.usbProductId === id.usbProductId
+  })
+  if (possible) await attach(handle, usb, {restoring:true}).catch(() => {})
 }
+for (const [api, usb] of [[navigator.serial,false],[navigator.usb,true]]) {
+  if (!api) continue
+  api.addEventListener("connect", e => restore(usb ? e.device : e.target, usb))
+  api.addEventListener("disconnect", e => {
+    const handle = usb ? e.device : e.target
+    const card = cards.get(remembered.get(handle))
+    if (card?.session?.handle === handle) void disconnect(card)
+  })
+  const authorized = usb ? api.getDevices() : api.getPorts()
+  authorized.then(handles => Promise.all(handles.map(h => restore(h,usb)))).catch(() => {})
+}
+if (new URLSearchParams(location.search).get("add") === "distance") picker.showModal()

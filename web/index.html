@@ -6,9 +6,29 @@
 <link rel="stylesheet" href="style.css">
 <header><strong>tscircuit</strong><span>/</span> Devices</header>
 <main>
-<h1>USB device console</h1>
-<section class="connection"><div><h2>Distance sensor</h2><p>VL53L0X · Live distance in millimeters</p></div><a href="/distance/">Open distance sensor →</a></section>
-<section class="connection"><div><h2 id="device">Serial device</h2><p id="state" role="status">Connect a tscircuit USB device to get started.</p></div><button id="connect">Connect device</button></section>
+<div class="heading"><h1>My devices</h1><button id="add">Add device</button></div>
+<p id="notice" role="status"></p><p id="empty">Add a USB device to view its readings or controls.</p>
+<div id="devices"></div>
+<dialog id="picker"><form method="dialog"><h2>Add device</h2><button aria-label="Close">×</button></form>
+<div id="choices"></div></dialog>
+<template id="card"><link rel="stylesheet" href="/style.css"><article>
+<div class="heading"><div><h2 id="name"></h2><p id="state" role="status">Disconnected</p></div>
+<div><button id="reconnect">Connect</button> <button id="remove">Remove</button></div></div>
+<div id="live" hidden>
+<div id="pot" hidden><div class="reading"><output id="position">—</output> <small>%</small></div><meter id="meter" min="0" max="255" value="0" aria-label="Knob position"></meter><p id="raw"></p></div>
+<div id="ranging" hidden><section aria-label="Live distance">
+  <div class="heading"><h2>Live distance</h2><small>Working range 30–300 mm</small></div>
+  <div class="reading"><output id="distance" aria-live="off">—</output> <small>mm</small></div>
+  <p id="quality">Awaiting measurement</p>
+</section>
+<section aria-labelledby="history-title">
+  <div class="heading"><h2 id="history-title">Distance over time</h2><small>Last 30 seconds · mm</small></div>
+  <canvas id="history" role="img" aria-label="Distance in millimeters over the last 30 seconds of sampling. Gaps indicate missing or invalid readings."></canvas>
+</section>
+<details><summary>Sensor help</summary>
+<p>Use desktop Chrome or Edge. Face the optical window toward the target. Readings below 30 mm or above 300 mm are flagged. An invalid return clears the distance display. Disconnect to stop sampling.</p>
+</details>
+</div>
 <section id="display" hidden><div class="heading"><h2>Flex display</h2><small>ER-TFT035IPS-6 · 480 × 320</small></div>
 <canvas id="screen" width="480" height="320" aria-label="Preview of the frame sent to the display"></canvas>
 <div id="brightness-control" hidden><label for="brightness">Brightness</label> <output id="brightness-value" for="brightness">100%</output>
@@ -17,6 +37,7 @@
 <button id="pattern">Test pattern</button><button id="video-stop" disabled>Stop video</button></div>
 <p id="media-state" role="status"></p></section>
 <section id="buzzer" hidden><h2>Buzzer</h2><form id="play"><label>Duration (ms)<input id="duration" type="number" required min="0" max="10000" value="250"></label><label id="rate-field" hidden>Modulation (Hz)<input id="rate" type="number" min="20" max="2000" placeholder="Off"></label><button>Beep</button><button type="button" data-command="stop">Stop</button></form><div class="led">Status LED <button data-command="led on">On</button><button data-command="led off">Off</button></div></section>
-<section><div class="heading"><h2>Serial console</h2><button data-command="help" disabled>Help</button></div><pre id="log" role="log" aria-label="Serial transcript"></pre><form id="terminal"><input id="command" aria-label="Serial command" placeholder="Enter a command" maxlength="39" required disabled autocomplete="off" spellcheck="false"><button id="send" disabled>Send</button></form></section>
+<section id="serial"><div class="heading"><h2>Serial console</h2><button data-command="help" disabled>Help</button></div><pre id="log" role="log" aria-label="Serial transcript"></pre><form id="terminal"><input id="command" aria-label="Serial command" placeholder="Enter a command" maxlength="39" required disabled autocomplete="off" spellcheck="false"><button id="send" disabled>Send</button></form></section>
+</div></article></template>
 <footer><a href="https://github.com/tscircuit/devices.tscircuit.com">Firmware &amp; source ↗</a></footer>
 </main><script type="module" src="app.js"></script></html>

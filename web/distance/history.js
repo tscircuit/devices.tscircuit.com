@@ -60,8 +60,10 @@ export function distanceHistory(canvas) {
     ctx.stroke()
   }
 
-  new ResizeObserver(draw).observe(canvas)
+  const observer = new ResizeObserver(draw)
+  observer.observe(canvas)
   return {
+    dispose() { observer.disconnect() },
     reset() { samples = []; draw() },
     add(mm) {
       const time = performance.now()
