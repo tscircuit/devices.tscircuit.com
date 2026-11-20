@@ -22,3 +22,9 @@ label input { display: block; width: 120px }
 pre { background: #14202e; color: #d8ebf7; min-height: 140px; max-height: 280px; overflow: auto; padding: 16px; border-radius: 7px; font: 14px/1.6 "IBM Plex Mono", monospace; overflow-wrap: anywhere; white-space: pre-wrap }
 #command { min-width: 100px; flex: 1 }
 footer a { font-size: 14px; color: #465b73 }
+
+.reading { margin: 14px 0 0; font-size: 24px; color: #465b73 }
+.reading output { font-size: clamp(48px,10vw,82px); line-height: 1.15; font-weight: 650; letter-spacing: -.055em; color: #1d2939; font-variant-numeric: tabular-nums }
+details { margin: 20px 0 }
+summary { cursor: pointer }
+.connection a, header a { color: #235cc0 }

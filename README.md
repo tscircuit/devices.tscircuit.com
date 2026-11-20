@@ -2,7 +2,13 @@
 
 Open [devices.tscircuit.com](https://devices.tscircuit.com) in desktop Chrome or Edge. Plug in a board, click **Connect device**, and select **tscircuit Buzzer**. The page queries its identity and shows the matching controls. The buzzer has a fixed pitch of approximately 2.8 kHz.
 
-## Serial commands
+## Distance sensor
+
+Open the [distance sensor page](https://devices.tscircuit.com/distance/) in desktop Chrome or Edge, choose **Connect sensor**, then select the CH341 adapter. The board uses a fixed-function CH341T bridge (1a86:5512). Its WebUSB driver probes the VL53L0X model ID at I²C address 0x29, configures the reference SPADs, performs reference calibrations and requests individual measurements. Configuration is applied each connection. There is no flashable MCU on this board.
+
+The page shows millimeters for completed measurements (device status 11) and flags results outside the board’s 30–300 mm working window. Invalid results clear the numeric display. See **Sensor help** on the page for usage. The driver and its third-party notices are in `web/distance/`.
+
+## Buzzer serial commands
 
 Open the USB CDC port at 115200 baud with DTR enabled. Send ASCII commands terminated by LF or CRLF. Responses end in CRLF.
 

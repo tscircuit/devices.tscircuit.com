@@ -7,7 +7,8 @@
 <header><strong>tscircuit</strong><span>/</span> Devices</header>
 <main>
 <h1>USB device console</h1>
-<section class="connection"><div><h2 id="device">Select a device</h2><p id="state" role="status">Connect a tscircuit USB device to get started.</p></div><button id="connect">Connect device</button></section>
+<section class="connection"><div><h2>Distance sensor</h2><p>VL53L0X · Live distance in millimeters</p></div><a href="/distance/">Open distance sensor →</a></section>
+<section class="connection"><div><h2 id="device">Serial device</h2><p id="state" role="status">Connect a tscircuit USB device to get started.</p></div><button id="connect">Connect device</button></section>
 <section id="buzzer" hidden><h2>Buzzer</h2><form id="play"><label>Duration (ms)<input id="duration" type="number" required min="0" max="10000" value="250"></label><label id="rate-field" hidden>Modulation (Hz)<input id="rate" type="number" min="20" max="2000" placeholder="Off"></label><button>Beep</button><button type="button" data-command="stop">Stop</button></form><div class="led">Status LED <button data-command="led on">On</button><button data-command="led off">Off</button></div></section>
 <section><div class="heading"><h2>Serial console</h2><button data-command="help" disabled>Help</button></div><pre id="log" role="log" aria-label="Serial transcript"></pre><form id="terminal"><input id="command" aria-label="Serial command" placeholder="Enter a command" maxlength="39" required disabled autocomplete="off" spellcheck="false"><button id="send" disabled>Send</button></form></section>
 <footer><a href="https://github.com/tscircuit/devices.tscircuit.com">Firmware &amp; source ↗</a></footer>

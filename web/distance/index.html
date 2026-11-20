@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distance sensor · tscircuit</title>
+<link rel="stylesheet" href="/style.css">
+<header><strong>tscircuit</strong><span>/</span> <a href="/">Devices</a></header>
+<main>
+<h1>Distance sensor</h1>
+<section class="connection">
+  <div><h2 id="identity">USB distance sensor</h2><p id="state" role="status">Connect the board and select its CH341 USB adapter.</p></div>
+  <button id="connect">Connect sensor</button>
+</section>
+<section aria-label="Live distance">
+  <div class="heading"><h2>Live distance</h2><small>Working range 30–300 mm</small></div>
+  <div class="reading"><output id="distance" aria-live="off">—</output> <small>mm</small></div>
+  <p id="quality">Awaiting measurement</p>
+</section>
+<details><summary>Sensor help</summary>
+<p>Use desktop Chrome or Edge. Face the optical window toward the target. Readings below 30 mm or above 300 mm are flagged. An invalid return clears the distance display. Disconnect to stop sampling.</p>
+</details>
+<footer><a href="https://github.com/tscircuit/devices.tscircuit.com">Driver &amp; source ↗</a></footer>
+</main><script type="module" src="/distance/page.js"></script></html>
