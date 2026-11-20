@@ -1,14 +1,11 @@
-import {openSwitch, startSwitch} from "./contact-switch.js"
+import {isContactSwitch, openSwitch, startSwitch} from "./contact-switch.js"
 import {DistanceSensor} from "./distance/sensor.js"
 import {identifySerial} from "./serial.js"
 import {startRanging, startSerial} from "./device-controls.js"
 
 const names = {
   encoder: "Rotary encoder", potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
-  toggle: "Toggle switch", limit: "Limit switch", buzzer: "Buzzer", resetter: "USB resetter"
-}
-function isContactSwitch(kind) {
-  return kind === "toggle" || kind === "limit"
+  button: "Button", toggle: "Toggle switch", limit: "Limit switch", buzzer: "Buzzer", resetter: "USB resetter"
 }
 const serialIds = {
   toggle: {usbVendorId: 0x1a86, usbProductId: 0x7523},
@@ -192,7 +189,6 @@ for (const [api, usb] of [[navigator.serial,false],[navigator.usb,true]]) {
   if (!api) continue
   api.addEventListener("connect", e => restore(usb ? e.device : e.target, usb))
   api.addEventListener("disconnect", e => {
-    const filterKind = isContactSwitch(kind) ? "toggle" : kind
     const handle = usb ? e.device : e.target
     const card = cards.get(remembered.get(handle))
     if (card?.session?.handle === handle) void disconnect(card)

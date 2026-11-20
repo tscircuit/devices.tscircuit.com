@@ -71,4 +71,4 @@ To flash the included image, bridge TP1 and TP2 while plugging the buzzer in, th
 
 The static Web Serial client lives in `web/`. Serve locally with `python3 -m http.server 8000 --directory web` and open http://localhost:8000. Vercel serves this directory over HTTPS. The linked GitHub repository deploys main to production and branches to previews.
 
-For a toggle or limit switch, choose its name under **Add device** and select the USB device. The limit switch shows **Pressed** or **Released** and the toggle shows **On** or **Off**. Both use the same USB identifier. After refreshing the page, use **Connect** on the corresponding saved card.
+For a button, toggle switch, or limit switch, choose its name under **Add device** and select the USB device. The button and limit switch show **Pressed** or **Released** and the toggle shows **On** or **Off**. All three use the same USB identifier. After refreshing the page, use **Connect** on the corresponding saved card.

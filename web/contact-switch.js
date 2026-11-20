@@ -1,3 +1,13 @@
+const switchLabels = {
+  toggle: ["Off", "On"],
+  limit: ["Pressed", "Released"],
+  button: ["Released", "Pressed"]
+}
+
+export function isContactSwitch(kind) {
+  return Object.hasOwn(switchLabels, kind)
+}
+
 async function readUsbSwitch(handle) {
   // CH340 modem status registers, with active-low CTS in bit 0.
   const result = await handle.controlTransferIn({
@@ -8,7 +18,7 @@ async function readUsbSwitch(handle) {
 }
 
 export async function openSwitch(handle, kind, usb) {
-  if (kind !== "limit" && kind !== "toggle") throw Error("Choose the connected switch type.")
+  if (!isContactSwitch(kind)) throw Error("Choose the connected switch type.")
   const readSwitch = usb ? () => readUsbSwitch(handle) : async () => (await handle.getSignals()).clearToSend
   if (usb) await handle.open()
   else await handle.open({baudRate:9600, flowControl:"none"})
@@ -43,9 +53,7 @@ export function startSwitch(root, session, failed) {
         candidate = clearToSend
         since = now
       } else if (now - since >= 20) {
-        const label = session.kind === "limit"
-          ? (candidate ? "Released" : "Pressed")
-          : (candidate ? "On" : "Off")
+        const label = switchLabels[session.kind][Number(candidate)]
         if (output.textContent !== label) output.textContent = label
       }
       await new Promise(resolve => setTimeout(resolve, 10))
