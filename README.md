@@ -70,3 +70,5 @@ To flash the included image, bridge TP1 and TP2 while plugging the buzzer in, th
 ## Website
 
 The static Web Serial client lives in `web/`. Serve locally with `python3 -m http.server 8000 --directory web` and open http://localhost:8000. Vercel serves this directory over HTTPS. The linked GitHub repository deploys main to production and branches to previews.
+
+For the toggle switch, choose **Add device → Toggle switch** and select its USB Serial port. The CH340C reports the switch position through CTS. The console shows **On** when CTS is asserted and **Off** when released, after 20 ms of stable input. This board uses a fixed-function USB bridge and shares its USB identifier with other CH340 adapters.

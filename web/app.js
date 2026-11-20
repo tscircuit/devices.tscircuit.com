@@ -1,12 +1,14 @@
+import {openToggle, startToggle} from "./toggle.js"
 import {DistanceSensor} from "./distance/sensor.js"
 import {identifySerial} from "./serial.js"
 import {startRanging, startSerial} from "./device-controls.js"
 
 const names = {
   encoder: "Rotary encoder", potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
-  buzzer: "Buzzer", resetter: "USB resetter"
+  toggle: "Toggle switch", buzzer: "Buzzer", resetter: "USB resetter"
 }
 const serialIds = {
+  toggle: {usbVendorId: 0x1a86, usbProductId: 0x7523},
   ch552: {usbVendorId: 0x1209, usbProductId: 0xc550},
   resetter: {usbVendorId: 0x2e8a, usbProductId: 0x000a}
 }
@@ -57,7 +59,11 @@ async function disconnect(card, error) {
 }
 
 async function openDevice(handle, usb) {
-  if (!usb) return Object.assign(await identifySerial(handle), {handle})
+  if (!usb) {
+    const info = handle.getInfo()
+    if (info.usbVendorId === serialIds.toggle.usbVendorId && info.usbProductId === serialIds.toggle.usbProductId) return openToggle(handle)
+    return Object.assign(await identifySerial(handle), {handle})
+  }
   await handle.open()
   try {
     await handle.selectConfiguration(1)
@@ -110,10 +116,10 @@ async function attach(handle, usb, {requested, target, restoring = false} = {}) 
     const failed = err => { if (card.session === session) void disconnect(card, err) }
     session.onEnd = failed
     const r = card.root
-    r.getElementById("state").textContent = usb ? "Connected · VL53L0X" : "Connected · Firmware " + session.version
+    r.getElementById("state").textContent = usb ? "Connected · VL53L0X" : kind === "toggle" ? "Connected · CH340C" : "Connected · Firmware " + session.version
     r.getElementById("reconnect").textContent = "Disconnect"
     r.getElementById("live").hidden = false
-    card.cleanup = usb ? startRanging(r,session,failed) : startSerial(r,session,failed)
+    card.cleanup = usb ? startRanging(r,session,failed) : kind === "toggle" ? startToggle(r,session,failed) : startSerial(r,session,failed)
     attached = true
   } finally {
     if (!attached) {
@@ -130,7 +136,7 @@ async function choose(kind, target) {
   try {
     if (!(usb ? navigator.usb : navigator.serial)) throw Error("Open this page in desktop Chrome or Edge to connect this device.")
     const handle = usb ? await navigator.usb.requestDevice({filters:[usbId]}) :
-      await navigator.serial.requestPort({filters:[kind === "resetter" ? serialIds.resetter : serialIds.ch552]})
+      await navigator.serial.requestPort({filters:[serialIds[kind] ?? serialIds.ch552]})
     await attach(handle, usb, {requested:kind, target})
   } catch (err) { if (err.name !== "NotFoundError") el("notice").textContent = err.message }
 }
@@ -154,7 +160,7 @@ async function restore(handle, usb) {
   const possible = [...cards.values()].some(c => {
     if (c.session) return false
     if (usb) return c.saved.kind === "distance" && info.vendorId === usbId.vendorId && info.productId === usbId.productId
-    const id = c.saved.kind === "resetter" ? serialIds.resetter : serialIds.ch552
+    const id = serialIds[c.saved.kind] ?? serialIds.ch552
     return c.saved.kind !== "distance" && info.usbVendorId === id.usbVendorId && info.usbProductId === id.usbProductId
   })
   if (possible) await attach(handle, usb, {restoring:true}).catch(() => {})
