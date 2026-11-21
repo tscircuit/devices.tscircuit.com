@@ -1,0 +1,36 @@
+---
+title: Rotary encoder
+description: "Rotary encoder mounting hole locations, usage and protocol."
+---
+
+An endless dial that counts detents in either direction and doubles as a pushbutton.
+
+## Mounting
+
+The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **19 × 25 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 2.5, 21.5 mm and Y = 2.5, 27.5 mm.
+
+<a href="/docs/img/devices/rotary-encoder/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/rotary-encoder/mounting.svg" alt="Dimensioned component-side view and isometric views of the rotary encoder with its 4 mounting holes" /></a>
+
+<a href="/docs/img/devices/rotary-encoder/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/rotary-encoder.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/dial.circuit.tsx)
+
+## Usage
+
+Choose **Add device → Rotary encoder**. Turn the shaft to change the relative count or push it to select. Power-up establishes zero. Allow axial travel behind a printed knob so the push switch can close.
+
+## 3D render
+
+<img className="device-render" src="/docs/img/devices/rotary-encoder/render.png" alt="3D render of the assembled rotary encoder PCB" />
+
+## Protocol
+
+Open the USB serial port at 115200 baud, assert DTR, and terminate each text command with a newline. Use `id` to identify the board, `help` for the command list, and `status` to request a fresh report. `led on` and `led off` control the indicator.
+
+A report is one JSON object per line. For example:
+
+```json
+{"module":"dial","count":3,"pressed":1,"invalid":0,"uptime_ms":1250,"led":0}
+```
+
+Interpret `count` as a wrapping 32-bit value. The console displays it as signed, so `4294967295` displays as −1. `pressed` is 1 while held. `invalid` counts rejected quadrature transitions. The firmware limits updates to one per 20 ms and repeats unchanged state about every 250 ms.
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/encoder/encoder.ino)

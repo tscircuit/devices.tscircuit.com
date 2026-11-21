@@ -1,3 +1,7 @@
 .vercel
 .env*
 build/
+
+node_modules/
+.docusaurus/
+web/docs/

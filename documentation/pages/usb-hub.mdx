@@ -1,0 +1,26 @@
+---
+title: Four-port USB hub
+description: "Four-port USB hub mounting hole locations, usage and protocol."
+---
+
+A computer-powered four-port USB 2.0 hub for connecting multiple desktop modules.
+
+## Mounting
+
+The PCB measures **44 × 42 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **38 × 10 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 3, 41 mm and Y = 16, 26 mm.
+
+<a href="/docs/img/devices/usb-hub/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/usb-hub/mounting.svg" alt="Dimensioned component-side view and isometric views of the four-port usb hub with its 4 mounting holes" /></a>
+
+<a href="/docs/img/devices/usb-hub/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/usb-hub.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/hub.circuit.tsx)
+
+## Usage
+
+Connect the upstream USB-C port to a computer with a data cable, then plug the peripherals into the four downstream ports. Allow up to 100 mA per downstream module in this design. Add each supported peripheral in the console. Leave clearance in the enclosure for all five plugs.
+
+## 3D render
+
+<img className="device-render" src="/docs/img/devices/usb-hub/render.png" alt="3D render of the assembled four-port usb hub PCB" />
+
+## Protocol
+
+The operating system enumerates the board using the standard USB 2.0 hub class. The host reads the hub descriptor, receives port-change notifications on the interrupt endpoint and uses class requests to query port status and reset newly attached devices. Each peripheral then enumerates separately with its own protocol. The hub requires no serial commands or console card.

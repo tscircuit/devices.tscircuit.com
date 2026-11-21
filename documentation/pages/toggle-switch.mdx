@@ -1,0 +1,30 @@
+---
+title: Toggle switch
+description: "Toggle switch mounting hole locations, usage and protocol."
+---
+
+A maintained two-position lever switch for controls that should stay on or off when you let go.
+
+## Mounting
+
+The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **19 × 25 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 2.5, 21.5 mm and Y = 2.5, 27.5 mm.
+
+<a href="/docs/img/devices/toggle-switch/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/toggle-switch/mounting.svg" alt="Dimensioned component-side view and isometric views of the toggle switch with its 4 mounting holes" /></a>
+
+<a href="/docs/img/devices/toggle-switch/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/toggle-switch.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/digital.circuit.tsx)
+
+## Usage
+
+Choose **Add device → Toggle switch** and flip the lever. The card displays **On** or **Off**. Leave room in the front panel for the lever to reach both stops.
+
+## 3D render
+
+<img className="device-render" src="/docs/img/devices/toggle-switch/render.png" alt="3D render of the assembled toggle switch PCB" />
+
+## Protocol
+
+Read the USB modem-status signal **CTS**. An asserted signal means **On** and a deasserted signal means **Off**. The contact sends its state through this signal without writing serial bytes.
+
+With Web Serial, open at 9600 baud with flow control disabled, set DTR low, and read `(await port.getSignals()).clearToSend`. With WebUSB, issue a device-recipient vendor IN request with request `0x95`, value `0x0706`, index `0`, and length `2`. CTS is asserted when bit 0 of the first byte is clear. The console polls every 10 ms and accepts a state after 20 ms of stability.
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/web/contact-switch.js)

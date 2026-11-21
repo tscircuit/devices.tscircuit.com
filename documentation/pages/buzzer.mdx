@@ -1,0 +1,39 @@
+---
+title: Buzzer
+description: "Buzzer mounting hole locations, usage and protocol."
+---
+
+A USB-powered active buzzer for short audible alerts.
+
+## Mounting
+
+The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **19 × 25 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 2.5, 21.5 mm and Y = 2.5, 27.5 mm.
+
+<a href="/docs/img/devices/buzzer/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/buzzer/mounting.svg" alt="Dimensioned component-side view and isometric views of the buzzer with its 4 mounting holes" /></a>
+
+<a href="/docs/img/devices/buzzer/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/buzzer.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/buzzer.circuit.tsx)
+
+## Usage
+
+Choose **Add device → Buzzer**, enter a duration, and choose **Beep**. Leave **Modulation (Hz)** empty for a steady beep. A rate in that field pulses the buzzer at 50% duty. Its internal oscillator still sets the dominant acoustic pitch near 3 kHz. Leave a sound opening in the enclosure.
+
+## 3D render
+
+<img className="device-render" src="/docs/img/devices/buzzer/render.png" alt="3D render of the assembled buzzer PCB" />
+
+## Protocol
+
+Open the USB serial port at 115200 baud, assert DTR, and terminate each text command with a newline. Firmware 1.1.0 identifies itself as `DEVICE tscircuit buzzer 1.1.0`.
+
+| Command | Behavior |
+| --- | --- |
+| `beep 250` | Sound for 250 ms. The default is 250 ms and the accepted range is 0–10000 ms. |
+| `tone 440 750` | Gate the sound at 440 Hz for 750 ms. Accepts 20–2000 Hz and 1–10000 ms. |
+| `stop` | Silence immediately. |
+| `status` | Return `STATUS buzzing` or `STATUS idle`. |
+| `led on`, `led off` | Set the indicator. |
+| `id`, `help` | Read identity or list commands. |
+
+A new beep replaces the current timer. Accepted playback commands return `OK`.
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/buzzer/buzzer.ino)

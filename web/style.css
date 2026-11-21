@@ -53,3 +53,5 @@ dialog::backdrop { background: #14202e66 }
 dialog form { margin-top: 0; justify-content: space-between; align-items: center }
 #choices { display: grid; gap: 8px; margin-top: 16px }
 #choices button { text-align: left }
+
+.docs-link { float: right; color: #345878; font-size: .9rem; line-height: 2; }

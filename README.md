@@ -72,3 +72,16 @@ To flash the included image, bridge TP1 and TP2 while plugging the buzzer in, th
 The static Web Serial client lives in `web/`. Serve locally with `python3 -m http.server 8000 --directory web` and open http://localhost:8000. Vercel serves this directory over HTTPS. The linked GitHub repository deploys main to production and branches to previews.
 
 For a button, toggle switch, or limit switch, choose its name under **Add device** and select the USB device. The button and limit switch show **Pressed** or **Released** and the toggle shows **On** or **Off**. All three use the same USB identifier. After refreshing the page, use **Connect** on the corresponding saved card.
+
+## Device documentation
+
+The Docusaurus site at [devices.tscircuit.com/docs](https://devices.tscircuit.com/docs/) is built into `web/docs/` alongside the device console. Run `npm ci` and `npm run docs:dev` for live editing, or `npm run build` for a production build. Edit a device page in `documentation/pages/` and its sidebar entry in `documentation/sections.json`.
+
+Each file in `documentation/drawings/*.circuit.tsx` contains the board outline, thickness and mounting-hole centres from the linked PCB revision. Coordinates in that source use the PCB centre as their origin. The published sheet also gives coordinates from its lower-left corner. The populated 3D views come from the board’s Circuit JSON and are stored beside the sheets in `documentation/static/img/devices/`.
+
+To regenerate the sheets, install Bun and run the following from the drawings directory. The generator uses tscircuit’s native drawing exporter for the dimensioned plan and the isometric outline of the populated board. The separate color PNG is only used on the device page. The GLBs in the models directory are mechanical meshes from the same Circuit JSON, with textures removed and component geometry simplified for the line drawing.
+
+```sh
+bun install
+PATH="$PWD/node_modules/.bin:$PATH" bun export.tsx
+```

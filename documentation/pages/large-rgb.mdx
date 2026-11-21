@@ -1,0 +1,26 @@
+---
+title: 7-inch RGB display
+description: "7-inch RGB display mounting hole locations, usage and protocol."
+---
+
+A controller for the 7-inch ER-TFT070-2 bare 800 × 480 RGB panel.
+
+## Mounting
+
+The PCB measures **54 × 54 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **40 × 40 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 7, 47 mm and Y = 7, 47 mm.
+
+<a href="/docs/img/devices/large-rgb/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/large-rgb/mounting.svg" alt="Dimensioned component-side view and isometric views of the 7-inch rgb display with its 4 mounting holes" /></a>
+
+<a href="/docs/img/devices/large-rgb/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/large-rgb.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/p4-display/large-rgb.circuit.tsx)
+
+## Usage
+
+Use the PCB as a controller behind a larger desktop instrument or information display. Support the glass separately, check the contact side of the 50-pin flex, and allow clearance for the connector latch.
+
+## 3D render
+
+<img className="device-render" src="/docs/img/devices/large-rgb/render.png" alt="3D render of the assembled 7-inch rgb display PCB" />
+
+## Protocol
+
+This prototype has a PCB design. USB application firmware and a device-console command set have not been published. The controller scans an RGB565 framebuffer continuously. It drives the most significant panel colour inputs plus pixel clock, data enable, HSYNC and VSYNC. One 800 × 480 framebuffer consumes 768000 bytes. Logic supply, panel bias, reset and backlight enable have distinct roles in the panel startup sequence.

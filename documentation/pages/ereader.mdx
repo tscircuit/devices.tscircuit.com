@@ -1,0 +1,26 @@
+---
+title: 5.83-inch e-paper display
+description: "5.83-inch e-paper display mounting hole locations, usage and protocol."
+---
+
+A carrier for the black-and-white 5.83-inch ER-EPD0583-1B bare e-paper panel.
+
+## Mounting
+
+The PCB measures **36 × 38 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **30 × 20 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 3, 33 mm and Y = 9, 29 mm.
+
+<a href="/docs/img/devices/ereader/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/ereader/mounting.svg" alt="Dimensioned component-side view and isometric views of the 5.83-inch e-paper display with its 4 mounting holes" /></a>
+
+<a href="/docs/img/devices/ereader/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/ereader.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/new-devices/ereader.circuit.tsx)
+
+## Usage
+
+Use it for a desk sign, schedule, or other image that changes occasionally. Mount the glass on its own support and leave slack at the ribbon. The drawing dimensions apply to the controller PCB.
+
+## 3D render
+
+<img className="device-render" src="/docs/img/devices/ereader/render.png" alt="3D render of the assembled 5.83-inch e-paper display PCB" />
+
+## Protocol
+
+This prototype has a PCB design. USB application firmware and a device-console command set have not been published. The controller sends commands and image data over four-wire SPI to the panel. Use CS for selection and D/C to distinguish commands from data. Reset the panel, load its image memory, trigger the refresh and wait for the BUSY signal to indicate completion before starting the next update. The panel controls an external boost stage during refresh.

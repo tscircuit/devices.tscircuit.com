@@ -1,0 +1,35 @@
+---
+title: Flex display
+description: "Flex display mounting hole locations, usage and protocol."
+---
+
+A USB adapter for streaming pictures or video to the 3.5-inch bare ER-TFT035IPS-6 panel.
+
+## Mounting
+
+The PCB measures **32 × 42 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **19 × 25 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 6.5, 25.5 mm and Y = 8.5, 33.5 mm.
+
+<a href="/docs/img/devices/flex-display/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/flex-display/mounting.svg" alt="Dimensioned component-side view and isometric views of the flex display with its 4 mounting holes" /></a>
+
+<a href="/docs/img/devices/flex-display/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/flex-display.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/display.circuit.tsx)
+
+## Usage
+
+With USB unplugged, seat and latch the ribbon in the 50-pin connector. Choose **Add device → Flex display** and select **Test pattern**. You can then choose a local image or video and set backlight brightness. Support the panel separately and leave room for the flex to bend.
+
+## 3D render
+
+<img className="device-render" src="/docs/img/devices/flex-display/render.png" alt="3D render of the assembled flex display PCB" />
+
+## Protocol
+
+Open the USB serial port at 115200 baud, assert DTR, and terminate each text command with a newline. Send `init` and wait for `OK init`. Choose a frame command, wait for `READY`, send exactly the indicated number of binary bytes, and wait for `OK frame` before sending another command.
+
+| Command | Frame | Bytes |
+| --- | --- | ---: |
+| `image` | 480 × 320 | 307200 |
+| `video` | 120 × 80, expanded on the panel | 19200 |
+
+Pixels are RGB565, high byte first, in row order. Send the raw payload without a trailing newline. Firmware 1.1.0 accepts `brightness` to read the setting and `brightness 50` to set 50%. The range is 0–100. Use `id` and `help` for discovery. Video is paced by acknowledgments and carries no audio.
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/display/media.h)
