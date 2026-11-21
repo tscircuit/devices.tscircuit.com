@@ -3,7 +3,30 @@ title: Distance sensor
 description: "Distance sensor mounting hole locations, usage and protocol."
 ---
 
+<img id="3d-render" className="device-render" src="/docs/img/devices/distance-sensor/render.png" alt="3D render of the assembled distance sensor PCB" />
+
 An optical time-of-flight sensor that measures the distance to a target in millimeters.
+
+## Usage
+
+Choose **Add device → Distance sensor**, grant USB access, and face the optical window toward the target. The card shows a live reading and 30 seconds of history. Design an opening around the sensor. The console flags readings outside 30–300 mm and leaves a gap for invalid returns.
+
+## Protocol
+
+**WebUSB → I²C** · 7-bit address `0x29`. The driver initializes and calibrates the sensor at each connection.
+
+| Operation | Request or signal | Result |
+| --- | --- | --- |
+| Identify | Read register `0xC0`. | Model ID `0xEE`. |
+| Initialize | Run the driver’s `initialize()` sequence. | Applies tuning and performs reference calibration. |
+| Start a sample | Run the single-shot start sequence in `sample()`. | Starts one range measurement. |
+| Wait for completion | Poll register `0x13`, mask `0x07`, after the start bit clears. | A nonzero masked value signals a result. |
+| Read distance | Read 12 bytes starting at `0x14`. | Bytes 10–11 give millimeters, high byte first. |
+| Clear interrupt | Write `0x01` to `0x0B`. | Acknowledges the measurement. |
+
+The console accepts the distance when bits 6–3 of byte 0 equal 11. See the driver for the full initialization sequence and USB packet format.
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/web/distance/sensor.js)
 
 ## Mounting
 
@@ -12,19 +35,3 @@ The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 
 <a href="/docs/img/devices/distance-sensor/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/distance-sensor/mounting.svg" alt="Dimensioned component-side view and isometric views of the distance sensor with its 4 mounting holes" /></a>
 
 <a href="/docs/img/devices/distance-sensor/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/distance-sensor.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/distance.circuit.tsx)
-
-## Usage
-
-Choose **Add device → Distance sensor**, grant USB access, and face the optical window toward the target. The card shows a live reading and 30 seconds of history. Design an opening around the sensor. The console flags readings outside 30–300 mm and leaves a gap for invalid returns.
-
-## 3D render
-
-<img className="device-render" src="/docs/img/devices/distance-sensor/render.png" alt="3D render of the assembled distance sensor PCB" />
-
-## Protocol
-
-The browser uses WebUSB to perform I²C transactions. At connection it probes 7-bit address `0x29` and expects model ID `0xEE` from register `0xC0`. It then configures the sensor and runs reference calibration.
-
-For each single-shot measurement the driver starts ranging, waits for completion, reads 12 bytes at `0x14`, and clears the interrupt by writing `1` to `0x0B`. Distance is `(data[10] << 8) | data[11]` mm. The console accepts a completed measurement when `(data[0] >> 3) & 15` equals 11. Use the linked driver for the complete initialization and USB framing.
-
-[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/web/distance/sensor.js)

@@ -3,7 +3,50 @@ title: Flex display
 description: "Flex display mounting hole locations, usage and protocol."
 ---
 
+<img id="3d-render" className="device-render" src="/docs/img/devices/flex-display/render.png" alt="3D render of the assembled flex display PCB" />
+
 A USB adapter for streaming pictures or video to the 3.5-inch bare ER-TFT035IPS-6 panel.
+
+## Usage
+
+With USB unplugged, seat and latch the ribbon in the 50-pin connector. Choose **Add device → Flex display** and select **Test pattern**. You can then choose a local image or video and set backlight brightness. Support the panel separately and leave room for the flex to bend.
+
+## Protocol
+
+**USB serial** · 115200 baud · DTR on. Send one ASCII command per line, ending in LF (`\n`).
+
+| Command | Purpose | Reply |
+| --- | --- | --- |
+| `id` | Identify the device and firmware. | `DEVICE tscircuit display 1.1.0` |
+| `help` | List supported commands. | One line of command syntax. |
+| `init` | Initialize the panel before sending pixels. | `OK init` |
+| `brightness` | Read the backlight setting. | `BRIGHTNESS N` (0–100) |
+| `brightness 50` | Set backlight brightness in percent (0–100). | `BRIGHTNESS 50` |
+| `image` | Begin a 480 × 320 still frame. Send 307200 bytes. | `READY`, then `OK frame` after the payload. |
+| `video` | Begin a 120 × 80 video frame. Send 19200 bytes. | `READY`, then `OK frame` after the payload. |
+
+### Sending a frame
+
+Send `init` and wait for `OK init`. Send `image` or `video` and wait for `READY` before writing pixels. Write RGB565 in row order, high byte first, with no trailing newline. Wait for `OK frame` before sending the next command. Video frames expand to fill the panel and carry no audio.
+
+<details>
+<summary>Legacy binary commands</summary>
+
+Send `A5 5A`, opcode, sequence number, payload length, payload, then CRC-8. The CRC covers the opcode through the last payload byte (polynomial `0x07`, initial value zero). The maximum payload is 48 bytes. The reply is `AC`, the same sequence number, and a status byte.
+
+| Opcode | Payload | Action |
+| --- | --- | --- |
+| `0x01` | Empty. | Reset the panel. |
+| `0x02` | Panel command byte, followed by up to 47 data bytes. | Write a command to the panel. |
+| `0x03` | 1–48 data bytes. | Write data to the panel. |
+| `0x04` | One byte, `0` or `1`. | Blank the backlight or restore the chosen brightness. |
+| `0x20` | One byte, `0` or `1`. | Turn the indicator off or on. |
+
+Status `0` means success, `2` means CRC mismatch, `3` means excessive length, and `4` means an invalid opcode or argument. Status `5` means the panel needs a reset.
+
+</details>
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/display/media.h)
 
 ## Mounting
 
@@ -12,24 +55,3 @@ The PCB measures **32 × 42 mm**, with **4 × Ø2.2 mm** clearance holes for M2 
 <a href="/docs/img/devices/flex-display/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/flex-display/mounting.svg" alt="Dimensioned component-side view and isometric views of the flex display with its 4 mounting holes" /></a>
 
 <a href="/docs/img/devices/flex-display/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/flex-display.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/display.circuit.tsx)
-
-## Usage
-
-With USB unplugged, seat and latch the ribbon in the 50-pin connector. Choose **Add device → Flex display** and select **Test pattern**. You can then choose a local image or video and set backlight brightness. Support the panel separately and leave room for the flex to bend.
-
-## 3D render
-
-<img className="device-render" src="/docs/img/devices/flex-display/render.png" alt="3D render of the assembled flex display PCB" />
-
-## Protocol
-
-Open the USB serial port at 115200 baud, assert DTR, and terminate each text command with a newline. Send `init` and wait for `OK init`. Choose a frame command, wait for `READY`, send exactly the indicated number of binary bytes, and wait for `OK frame` before sending another command.
-
-| Command | Frame | Bytes |
-| --- | --- | ---: |
-| `image` | 480 × 320 | 307200 |
-| `video` | 120 × 80, expanded on the panel | 19200 |
-
-Pixels are RGB565, high byte first, in row order. Send the raw payload without a trailing newline. Firmware 1.1.0 accepts `brightness` to read the setting and `brightness 50` to set 50%. The range is 0–100. Use `id` and `help` for discovery. Video is paced by acknowledgments and carries no audio.
-
-[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/display/media.h)

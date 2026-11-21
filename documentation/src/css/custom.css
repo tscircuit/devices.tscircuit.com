@@ -127,3 +127,29 @@ article h3 {
   .navbar__inner, .navbar-sidebar__brand { height: 4rem; }
   nav[aria-label="Device documentation sections"] { display: none; }
 }
+
+.device-render {
+  margin: 1rem 0 1.25rem;
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem);
+}
+
+.markdown table {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  font-size: .9375rem;
+  line-height: 1.5;
+}
+.markdown table th, .markdown table td {
+  padding: .65rem .8rem;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.markdown table th:first-child { width: 23%; }
+.markdown table th:last-child { width: 33%; }
+.markdown table code { white-space: normal; }
+@media (max-width: 600px) {
+  .markdown table { font-size: .875rem; }
+  .markdown table th, .markdown table td { padding: .5rem; }
+}

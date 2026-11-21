@@ -3,7 +3,28 @@ title: Limit switch
 description: "Limit switch mounting hole locations, usage and protocol."
 ---
 
+<img id="3d-render" className="device-render" src="/docs/img/devices/limit-switch/render.png" alt="3D render of the assembled limit switch PCB" />
+
 A roller-lever switch for detecting when a moving part reaches a stop.
+
+## Usage
+
+Choose **Add device → Limit switch**. Press the lever until it clicks, then release it. Place the stop so it trips the lever before the end of travel. The normally closed contact changes the sense of CTS compared with the pushbutton.
+
+## Protocol
+
+**USB contact input.** Read the clear-to-send signal (CTS) to get the switch state.
+
+| Operation | Request or signal | Result |
+| --- | --- | --- |
+| Open with Web Serial | `port.open({baudRate: 9600, flowControl: "none"})` | Opens the port for polling. |
+| Set DTR low | `port.setSignals({dataTerminalReady: false})` | Configures the serial control line. |
+| Read with Web Serial | `(await port.getSignals()).clearToSend` | `true` = **Released**, `false` = **Pressed**. |
+| Read with WebUSB | Vendor IN request to the device: `0x95`, value `0x0706`, index `0`, length `2`. | Bit 0 of byte 0: `0` = **Released**, `1` = **Pressed**. |
+
+Use either the Web Serial or WebUSB path. The console polls every 10 ms and displays a change after 20 ms of stable readings.
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/web/contact-switch.js)
 
 ## Mounting
 
@@ -12,19 +33,3 @@ The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 
 <a href="/docs/img/devices/limit-switch/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/limit-switch/mounting.svg" alt="Dimensioned component-side view and isometric views of the limit switch with its 4 mounting holes" /></a>
 
 <a href="/docs/img/devices/limit-switch/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/limit-switch.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/digital.circuit.tsx)
-
-## Usage
-
-Choose **Add device → Limit switch**. Press the lever until it clicks, then release it. Place the stop so it trips the lever before the end of travel. The normally closed contact changes the sense of CTS compared with the pushbutton.
-
-## 3D render
-
-<img className="device-render" src="/docs/img/devices/limit-switch/render.png" alt="3D render of the assembled limit switch PCB" />
-
-## Protocol
-
-Read the USB modem-status signal **CTS**. An asserted signal means **Released** and a deasserted signal means **Pressed**. The contact sends its state through this signal without writing serial bytes.
-
-With Web Serial, open at 9600 baud with flow control disabled, set DTR low, and read `(await port.getSignals()).clearToSend`. With WebUSB, issue a device-recipient vendor IN request with request `0x95`, value `0x0706`, index `0`, and length `2`. CTS is asserted when bit 0 of the first byte is clear. The console polls every 10 ms and accepts a state after 20 ms of stability.
-
-[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/web/contact-switch.js)

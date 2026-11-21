@@ -3,7 +3,37 @@ title: Potentiometer
 description: "Potentiometer mounting hole locations, usage and protocol."
 ---
 
+<img id="3d-render" className="device-render" src="/docs/img/devices/potentiometer/render.png" alt="3D render of the assembled potentiometer PCB" />
+
 A 10 kΩ linear knob for setting an absolute level such as volume or brightness.
+
+## Usage
+
+Choose **Add device → Potentiometer**. Move the knob between its two end stops to see the percentage and raw reading. The shaft position is absolute, including after reconnecting.
+
+## Protocol
+
+**USB serial** · 115200 baud · DTR on. Send one ASCII command per line, ending in LF (`\n`).
+
+| Command | Purpose | Reply |
+| --- | --- | --- |
+| `id` | Identify the device and firmware. | `DEVICE tscircuit potentiometer 1.0.0` |
+| `help` | List supported commands. | One line of command syntax. |
+| `status` | Request the current absolute knob position. | One JSON report, shown below. |
+| `led on` | Turn the indicator on. | `OK led=on` |
+| `led off` | Turn the indicator off. | `OK led=off` |
+
+### Streamed report
+
+The board streams one JSON object per line and repeats an unchanged reading about every 250 ms.
+
+```json
+{"module":"position","raw":128,"max":255,"uptime_ms":1000,"led":0}
+```
+
+The firmware averages eight samples. `raw` ranges from 0 to 255. To convert to percent, calculate `100 * raw / max`. `uptime_ms` counts milliseconds since power-up, and `led` is 1 when the indicator is on.
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/potentiometer/potentiometer.ino)
 
 ## Mounting
 
@@ -12,23 +42,3 @@ The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 
 <a href="/docs/img/devices/potentiometer/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/potentiometer/mounting.svg" alt="Dimensioned component-side view and isometric views of the potentiometer with its 4 mounting holes" /></a>
 
 <a href="/docs/img/devices/potentiometer/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/potentiometer.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/position.circuit.tsx)
-
-## Usage
-
-Choose **Add device → Potentiometer**. Move the knob between its two end stops to see the percentage and raw reading. The shaft position is absolute, including after reconnecting.
-
-## 3D render
-
-<img className="device-render" src="/docs/img/devices/potentiometer/render.png" alt="3D render of the assembled potentiometer PCB" />
-
-## Protocol
-
-Open the USB serial port at 115200 baud, assert DTR, and terminate each text command with a newline. Use `id` to identify the board, `help` for the command list, and `status` to request a fresh report. `led on` and `led off` control the indicator.
-
-The firmware averages eight samples and sends one JSON object per line. `raw` runs from 0 to 255. Convert it to percent with `100 * raw / max`. An unchanged value is repeated about every 250 ms.
-
-```json
-{"module":"position","raw":128,"max":255,"uptime_ms":1000,"led":0}
-```
-
-[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/potentiometer/potentiometer.ino)

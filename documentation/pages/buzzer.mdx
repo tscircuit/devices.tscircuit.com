@@ -3,7 +3,48 @@ title: Buzzer
 description: "Buzzer mounting hole locations, usage and protocol."
 ---
 
+<img id="3d-render" className="device-render" src="/docs/img/devices/buzzer/render.png" alt="3D render of the assembled buzzer PCB" />
+
 A USB-powered active buzzer for short audible alerts.
+
+## Usage
+
+Choose **Add device → Buzzer**, enter a duration, and choose **Beep**. Leave **Modulation (Hz)** empty for a steady beep. A rate in that field pulses the buzzer at 50% duty. Its internal oscillator still sets the dominant acoustic pitch near 3 kHz. Leave a sound opening in the enclosure.
+
+## Protocol
+
+**USB serial** · 115200 baud · DTR on. Send one ASCII command per line, ending in LF (`\n`).
+
+| Command | Purpose | Reply |
+| --- | --- | --- |
+| `id` | Identify the device and firmware. | `DEVICE tscircuit buzzer 1.1.0` |
+| `help` | List supported commands. | One line of command syntax. |
+| `?` | Alias for `help`. | Same command list. |
+| `status` | Read the playback state. | `STATUS idle` or `STATUS buzzing` |
+| `beep` | Play the default 250 ms beep. | `OK` |
+| `beep 500` | Play for the given duration in milliseconds (0–10000). | `OK` |
+| `tone 440 750` | Pulse the buzzer at 440 Hz for 750 ms. Accepts 20–2000 Hz and 1–10000 ms. | `OK` |
+| `stop` | Silence the buzzer immediately. | `OK` |
+| `led on` | Turn the indicator on. | `OK` |
+| `led off` | Turn the indicator off. | `OK` |
+
+A new beep or tone replaces the current timer. The frequency in `tone` controls the modulation rate.
+
+<details>
+<summary>Legacy binary commands</summary>
+
+Send `A5 5A`, opcode, sequence number, payload length, payload, then CRC-8. The CRC covers the opcode through the last payload byte (polynomial `0x07`, initial value zero). The maximum payload is 48 bytes. The reply is `AC`, the same sequence number, and a status byte.
+
+| Opcode | Payload | Action |
+| --- | --- | --- |
+| `0x10` | Duration in ms, two bytes, little-endian. | Play for 0–10000 ms. |
+| `0x20` | One byte, `0` or `1`. | Turn the indicator off or on. |
+
+Status `0` means success, `2` means CRC mismatch, `3` means excessive length, and `4` means an invalid opcode or argument.
+
+</details>
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/buzzer/buzzer.ino)
 
 ## Mounting
 
@@ -12,28 +53,3 @@ The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 
 <a href="/docs/img/devices/buzzer/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/buzzer/mounting.svg" alt="Dimensioned component-side view and isometric views of the buzzer with its 4 mounting holes" /></a>
 
 <a href="/docs/img/devices/buzzer/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/buzzer.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/buzzer.circuit.tsx)
-
-## Usage
-
-Choose **Add device → Buzzer**, enter a duration, and choose **Beep**. Leave **Modulation (Hz)** empty for a steady beep. A rate in that field pulses the buzzer at 50% duty. Its internal oscillator still sets the dominant acoustic pitch near 3 kHz. Leave a sound opening in the enclosure.
-
-## 3D render
-
-<img className="device-render" src="/docs/img/devices/buzzer/render.png" alt="3D render of the assembled buzzer PCB" />
-
-## Protocol
-
-Open the USB serial port at 115200 baud, assert DTR, and terminate each text command with a newline. Firmware 1.1.0 identifies itself as `DEVICE tscircuit buzzer 1.1.0`.
-
-| Command | Behavior |
-| --- | --- |
-| `beep 250` | Sound for 250 ms. The default is 250 ms and the accepted range is 0–10000 ms. |
-| `tone 440 750` | Gate the sound at 440 Hz for 750 ms. Accepts 20–2000 Hz and 1–10000 ms. |
-| `stop` | Silence immediately. |
-| `status` | Return `STATUS buzzing` or `STATUS idle`. |
-| `led on`, `led off` | Set the indicator. |
-| `id`, `help` | Read identity or list commands. |
-
-A new beep replaces the current timer. Accepted playback commands return `OK`.
-
-[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/buzzer/buzzer.ino)

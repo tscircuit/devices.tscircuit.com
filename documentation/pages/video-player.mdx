@@ -3,7 +3,25 @@ title: 3.5-inch video player
 description: "3.5-inch video player mounting hole locations, usage and protocol."
 ---
 
+<img id="3d-render" className="device-render" src="/docs/img/devices/video-player/render.png" alt="3D render of the assembled 3.5-inch video player PCB" />
+
 A microSD-backed controller designed for local video playback on the 3.5-inch ER-TFT035IPS-6 panel.
+
+## Usage
+
+Fit the bare panel and a microSD card, leaving access to the socket on the reverse side of the PCB. The design targets 30 full frames per second. Playback at that rate still needs firmware and an end-to-end measurement on hardware.
+
+## Protocol
+
+**Four-bit SD and 16-bit i80 display bus.** This prototype has no published USB command set. The table describes the interface on the PCB.
+
+| Operation | Request or signal | Result |
+| --- | --- | --- |
+| Read media | Transfer data from microSD over the four-bit SD bus. | Supplies local video data to the controller. |
+| Select panel operation | Set D/C to command mode and strobe the write line. | Sends a panel command. |
+| Write pixels | Use data mode and clock one RGB565 pixel per write strobe. | A 320 × 480 frame consumes 307200 bytes. |
+
+The 30 fps design target requires 9.216 MB/s of pixel data. The USB frame commands documented for the flex display apply to that board’s firmware.
 
 ## Mounting
 
@@ -12,15 +30,3 @@ The PCB measures **48 × 48 mm**, with **4 × Ø2.2 mm** clearance holes for M2 
 <a href="/docs/img/devices/video-player/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/video-player/mounting.svg" alt="Dimensioned component-side view and isometric views of the 3.5-inch video player with its 4 mounting holes" /></a>
 
 <a href="/docs/img/devices/video-player/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/video-player.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/p4-display/video-player.circuit.tsx)
-
-## Usage
-
-Fit the bare panel and a microSD card, leaving access to the socket on the reverse side of the PCB. The design targets 30 full frames per second. Playback at that rate still needs firmware and an end-to-end measurement on hardware.
-
-## 3D render
-
-<img className="device-render" src="/docs/img/devices/video-player/render.png" alt="3D render of the assembled 3.5-inch video player PCB" />
-
-## Protocol
-
-This prototype has a PCB design. USB application firmware and a device-console command set have not been published. Storage uses a four-bit SD bus. The display side uses a 16-bit i80 parallel interface with one RGB565 pixel per write strobe. D/C selects register commands or pixel data. A full 320 × 480 frame occupies 307200 bytes, so 30 fps requires 9.216 MB/s of pixel payload. The USB frame commands on the original flex display belong to a separate firmware implementation.

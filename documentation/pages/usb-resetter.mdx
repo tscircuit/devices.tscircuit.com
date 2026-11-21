@@ -3,7 +3,42 @@ title: USB resetter
 description: "USB resetter mounting hole locations, usage and protocol."
 ---
 
+<img id="3d-render" className="device-render" src="/docs/img/devices/usb-resetter/render.png" alt="3D render of the assembled usb resetter PCB" />
+
 A three-port USB power switch that can restart a downstream device on a timer.
+
+## Usage
+
+Connect the control port to the computer, the passthrough input to the upstream supply, and the target to the output. Choose **Add device → USB resetter**. Send `status` to read the input and output voltages, or `cycle 1` to interrupt downstream power for one second. Leave access to all three connectors.
+
+## Protocol
+
+**USB serial** · 115200 baud · DTR on. Send one ASCII command per line, ending in LF (`\n`).
+
+| Command | Purpose | Reply |
+| --- | --- | --- |
+| `id` | Identify the device and firmware. | `DEVICE tscircuit resetter 1.0.0` |
+| `help` | List supported commands. | One line of command syntax. |
+| `?` | Alias for `help`. | Same command list. |
+| `status` | Read output state and measured input/output voltages. | Status line shown below. |
+| `on` | Enable output power and cancel a pending cycle. | Status line with `out=on`. |
+| `off` | Cut output power and cancel a pending cycle. | Status line with `out=off`. |
+| `cycle` | Cut power for the default 1 second, then restore it. | `OK cycling` |
+| `cycle 0.5` | Cut power for the given number of seconds (0.01–60). | `OK cycling` |
+| `reset` | Alias for `cycle`, with the same optional duration. | `OK cycling` |
+| `led on` | Turn the indicator on. | `OK led=on` |
+| `led off` | Turn the indicator off. | `OK led=off` |
+| `led auto` | Show power state on the indicator. | `OK led=auto` |
+
+### Status reply
+
+```text
+OK out=on vin=5.001 vout=4.992
+```
+
+`out` is the commanded switch state. `vin` and `vout` are measured in volts. The board starts with output enabled and times each power cycle locally.
+
+[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/resetter/main.c)
 
 ## Mounting
 
@@ -12,25 +47,3 @@ The PCB measures **42 × 42 mm**, with **4 × Ø3.2 mm** clearance holes for M3 
 <a href="/docs/img/devices/usb-resetter/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/usb-resetter/mounting.svg" alt="Dimensioned component-side view and isometric views of the usb resetter with its 4 mounting holes" /></a>
 
 <a href="/docs/img/devices/usb-resetter/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/usb-resetter.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/resetter.circuit.tsx)
-
-## Usage
-
-Connect the control port to the computer, the passthrough input to the upstream supply, and the target to the output. Choose **Add device → USB resetter**. Send `status` to read the input and output voltages, or `cycle 1` to interrupt downstream power for one second. Leave access to all three connectors.
-
-## 3D render
-
-<img className="device-render" src="/docs/img/devices/usb-resetter/render.png" alt="3D render of the assembled usb resetter PCB" />
-
-## Protocol
-
-Open the USB serial port at 115200 baud, assert DTR, and terminate each text command with a newline. The board starts with power enabled. It restores power on its own timer after acknowledging a cycle.
-
-| Command | Response or effect |
-| --- | --- |
-| `id` / `help` | Identity or command list. |
-| `status` | For example, `OK out=on vin=5.001 vout=4.992`. Voltages are in volts. |
-| `cycle 0.5` / `reset 0.5` | Turn off for 0.5 s. Accepts 0.01–60 s, defaults to 1 s, and replies `OK cycling`. |
-| `on` / `off` | Set output power and cancel any pending cycle. |
-| `led on` / `led off` / `led auto` | Set the status indicator mode. |
-
-[Protocol implementation](https://github.com/tscircuit/devices.tscircuit.com/blob/main/firmware/resetter/main.c)
