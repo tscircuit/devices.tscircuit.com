@@ -85,3 +85,5 @@ To regenerate the sheets, install Bun and run the following from the drawings di
 bun install
 PATH="$PWD/node_modules/.bin:$PATH" bun export.tsx
 ```
+
+The device pages link to the [versioned CAD downloads](https://github.com/tscircuit/devices.tscircuit.com/releases/tag/board-cad-2026-11-21). Downloadable GLBs use glTF’s meter units and include the populated board. STEP assemblies use millimeters with the PCB midplane at Z = 0. Actuator heights on the device pages and mounting sheets are measured from the component-side surface of the PCB.

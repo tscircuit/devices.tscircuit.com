@@ -2,6 +2,7 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "Potentiometer",
+  "heightNote": "Shaft tip: 20 mm above PCB top (without knob)",
   "usbEdge": "bottom",
   "width": 24,
   "height": 30,

@@ -153,3 +153,18 @@ article h3 {
   .markdown table { font-size: .875rem; }
   .markdown table th, .markdown table td { padding: .5rem; }
 }
+
+.cad-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin: .75rem 0 1.25rem;
+}
+.cad-downloads a {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: .4rem;
+  padding: .4rem .8rem;
+  font-size: .875rem;
+  font-weight: 600;
+}
+.cad-downloads a:hover { background: var(--ifm-color-emphasis-100); }

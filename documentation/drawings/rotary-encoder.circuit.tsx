@@ -2,6 +2,7 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "Rotary encoder",
+  "heightNote": "Released shaft tip: 24.5 mm above PCB top (without knob)",
   "usbEdge": "bottom",
   "width": 24,
   "height": 30,

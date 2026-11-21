@@ -2,6 +2,7 @@ import { assembly } from "tscircuit"
 
 export interface Mount {
   title: string
+  heightNote?: string
   usbEdge: "top" | "bottom"
   width: number
   height: number

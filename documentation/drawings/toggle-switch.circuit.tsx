@@ -2,6 +2,7 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "Toggle switch",
+  "heightNote": "Lever tip in modeled position: approx. 26.5 mm above PCB top",
   "usbEdge": "bottom",
   "width": 24,
   "height": 30,
