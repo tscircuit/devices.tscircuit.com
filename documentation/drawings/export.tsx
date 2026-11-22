@@ -30,9 +30,16 @@ try {
     const assetDir = join(dir, "../static/img/devices", slug)
     const raw = join(temp, slug + ".svg")
     await $`tsci export ${join(dir,file)} --drawing mounting -o ${raw}`.cwd(dir)
-    const {mount} = await import(join(dir,file))
+    const {mount, SheetCallout} = await import(join(dir,file))
     const details = renderToStaticMarkup(<SheetDetails m={mount}/>)
-    const sheet = (await readFile(raw,"utf8")).replace("</svg>",details+"</svg>")
+    const nativeSheet = await readFile(raw, "utf8")
+    let callout = ""
+    if (SheetCallout) {
+      const scale = nativeSheet.match(/Component side · ([\d.]+):1/)
+      if (!scale) throw Error("Missing component-side scale: " + slug)
+      callout = renderToStaticMarkup(<SheetCallout planScale={Number(scale[1])} />)
+    }
+    const sheet = nativeSheet.replace("</svg>", details + callout + "</svg>")
     if (!sheet.includes("drawing_dimension_line") || !sheet.includes("Assembled board · isometric")) throw Error("Incomplete sheet: "+slug)
     await writeFile(join(assetDir,"mounting.svg"),sheet)
   }

@@ -5,9 +5,20 @@ description: Play sound through an 8 ohm plug-in speaker. Includes connector pin
 
 import CadDownloads from "@site/src/components/CadDownloads"
 
-<img id="3d-render" className="device-render" src="/docs/img/devices/speaker/render.png" alt="Assembled USB-C speaker with the 23 mm driver and its red and black leads plugged into J2" />
+<svg id="3d-render" className="device-render" viewBox="0 0 600 400" role="img" aria-labelledby="speaker-assembly-title">
+  <title id="speaker-assembly-title">J2 on the USB-C speaker PCB with the speaker cable plugged in</title>
+  <image href="/docs/img/devices/speaker/render.png" width="600" height="400" />
+  <rect x="10" y="50" width="156" height="51" rx="4" fill="white" />
+  <g fontFamily="Arial, sans-serif" fill="#171717">
+    <text x="19" y="72" fontSize="17" fontWeight="bold">J2 · Speaker</text>
+    <text x="19" y="92" fontSize="13">2-pin JST SH · 1 mm</text>
+  </g>
+  <path d="M87 101 V126 L176 199" fill="none" stroke="white" strokeWidth="4" />
+  <path d="M87 101 V126 L176 199" fill="none" stroke="#171717" strokeWidth="1.5" />
+  <circle cx="178" cy="201" r="3" stroke="white" fill="#171717" />
+</svg>
 
-Plug the speaker into **J2**, connect the board to a computer with a USB-C data cable, and select **USB AUDIO DAC** in the computer’s sound output settings. Music, voice and notification sounds play through the speaker. The board mixes left and right into mono.
+With the USB-C port facing you, plug the speaker straight down into **J2**, the white connector near the upper-left edge. Then connect the board to a computer with a USB-C data cable, and select **USB AUDIO DAC** in the computer’s sound output settings. Music, voice and notification sounds play through the speaker. The board mixes left and right into mono.
 
 The CAD downloads contain the populated PCB. The assembly view above shows one way to route the speaker lead.
 
@@ -21,7 +32,7 @@ Start at low system volume. Play the short chime below to check that the sound c
 
 ## Speaker connection
 
-J2 accepts the **Same Sky CMS-23558N-L152B**, the 8 Ω, 1 W speaker used for the tscircuitboy advance. The 23 mm diameter speaker is 5.5 mm thick. Its 152 mm lead ends in a two-pin, 1 mm-pitch JST-SH plug. The matching board header is **BM02B-SRSS-TB**. Align the keyed housings and press the plug straight down. Allow room above J2 to remove the plug and leave an opening in the enclosure over the speaker.
+J2 accepts the **Same Sky CMS-23558N-L152B**, the 8 Ω, 1 W speaker used for the tscircuitboy advance. The 23 mm diameter speaker is 5.5 mm thick. Its 152 mm lead ends in a **JST SH SHR-02V-S-B** cable housing. It mates with the **BM02B-SRSS-TB** top-entry board header (two pins, 1.0 mm pitch). Align the keyed housings and press the plug straight down. Allow room above J2 to remove the plug and leave an opening in the enclosure over the speaker.
 
 | J2 pin | Speaker wire | Signal |
 | --- | --- | --- |
@@ -30,7 +41,7 @@ J2 accepts the **Same Sky CMS-23558N-L152B**, the 8 Ω, 1 W speaker used for the
 
 Both wires are driven by the amplifier. Keep both isolated from enclosure ground. The speaker’s 1 W rating describes its power handling. This board limits gain for a low-power USB port.
 
-[Speaker dimensions and cable drawing (PDF)](https://www.sameskydevices.com/product/resource/cms-23558n-l152.pdf)
+[JST connector drawing (PDF)](https://www.jst-mfg.com/product/pdf/eng/eSH.pdf) · [Speaker dimensions and cable drawing (PDF)](https://www.sameskydevices.com/product/resource/cms-23558n-l152.pdf)
 
 ## Protocol
 
@@ -50,6 +61,6 @@ The computer’s USB Audio Class 1 driver handles playback and identification. U
 
 The PCB is **26 × 30 × 1.6 mm**. All components mount on top of the two-layer board. J2 reaches **4.3 mm above** the PCB before the speaker is plugged in. Four **Ø2.2 mm** holes accept M2 screws on a **20 × 20 mm** grid. With J1 at the bottom and the components facing you, the hole centres are at X = 3 and 23 mm, Y = 2.5 and 22.5 mm, measured from the lower-left corner.
 
-<a href="/docs/img/devices/speaker/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/speaker/mounting.svg" alt="Top and isometric views with board dimensions and 20 mm hole pitch on both axes" /></a>
+<a href="/docs/img/devices/speaker/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/speaker/mounting.svg" alt="J2 marked near the upper-left of the component-side plan and identified on the isometric view as the 2-pin JST SH speaker connector" /></a>
 
 <a href="/docs/img/devices/speaker/mounting.svg">Full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/speaker.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/top-side-assembly/new-devices/speaker.circuit.tsx) · [Prototype fabrication files](https://github.com/tscircuit/devices.tscircuit.com/releases/download/top-side-boards-v1/speaker-prototype.zip)
