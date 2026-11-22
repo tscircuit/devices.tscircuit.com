@@ -7,15 +7,19 @@ import CadDownloads from "@site/src/components/CadDownloads"
 
 <img id="3d-render" className="device-render" src="/docs/img/devices/buzzer/render.png" alt="3D render of the assembled buzzer PCB" />
 
-A USB-powered active buzzer for short audible alerts.
+A USB-powered passive piezo sounder for playing notes and audible alerts.
 
 <CadDownloads board="buzzer" />
 
-**Modeled component height: approximately 5.0 mm above the component-side PCB surface.**
+**Modeled component height: approximately 3.0 mm above the component-side PCB surface.**
 
 ## Usage
 
-Choose **Add device → Buzzer**, enter a duration, and choose **Beep**. Leave **Modulation (Hz)** empty for a steady beep. A rate in that field pulses the buzzer at 50% duty. Its internal oscillator still sets the dominant acoustic pitch near 3 kHz. Leave a sound opening in the enclosure.
+Choose **Add device → Buzzer**, enter **Frequency (Hz)** and a duration, then choose **Beep**. Try 440 Hz followed by 880 Hz to hear an octave. The default is 4000 Hz, where the sounder is rated. Lower pitches can be quieter. Leave an opening over the sound outlet in your enclosure.
+
+Boards identifying as version 1.x have the original oscillator buzzer and use the **Modulation (Hz)** control. Their mounting pattern is 19 × 25 mm.
+
+[Download revision 2 firmware](https://github.com/tscircuit/devices.tscircuit.com/releases/download/embedded-boards-v1/buzzer-2.0.0.hex) · [Prototype fabrication files](https://github.com/tscircuit/devices.tscircuit.com/releases/download/embedded-boards-v1/buzzer-prototype.zip)
 
 ## Protocol
 
@@ -23,18 +27,18 @@ Choose **Add device → Buzzer**, enter a duration, and choose **Beep**. Leave *
 
 | Command | Purpose | Reply |
 | --- | --- | --- |
-| `id` | Identify the device and firmware. | `DEVICE tscircuit buzzer 1.1.0` |
+| `id` | Identify the device and firmware. | `DEVICE tscircuit buzzer 2.0.0` |
 | `help` | List supported commands. | One line of command syntax. |
 | `?` | Alias for `help`. | Same command list. |
 | `status` | Read the playback state. | `STATUS idle` or `STATUS buzzing` |
 | `beep` | Play the default 250 ms beep. | `OK` |
 | `beep 500` | Play for the given duration in milliseconds (0–10000). | `OK` |
-| `tone 440 750` | Pulse the buzzer at 440 Hz for 750 ms. Accepts 20–2000 Hz and 1–10000 ms. | `OK` |
+| `tone 440 750` | Play a 440 Hz tone for 750 ms. Accepts 20–4000 Hz and 1–10000 ms. | `OK` |
 | `stop` | Silence the buzzer immediately. | `OK` |
 | `led on` | Turn the indicator on. | `OK` |
 | `led off` | Turn the indicator off. | `OK` |
 
-A new beep or tone replaces the current timer. The frequency in `tone` controls the modulation rate.
+A new beep or tone replaces the current timer.
 
 <details>
 <summary>Legacy binary commands</summary>
@@ -54,8 +58,8 @@ Status `0` means success, `2` means CRC mismatch, `3` means excessive length, an
 
 ## Mounting
 
-The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **19 × 25 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 2.5, 21.5 mm and Y = 2.5, 27.5 mm.
+The PCB measures **24 × 30 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **20 × 20 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 2, 22 mm and Y = 2.5, 22.5 mm.
 
 <a href="/docs/img/devices/buzzer/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/buzzer/mounting.svg" alt="Dimensioned component-side view and isometric views of the buzzer with its 4 mounting holes" /></a>
 
-<a href="/docs/img/devices/buzzer/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/buzzer.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/buzzer.circuit.tsx)
+<a href="/docs/img/devices/buzzer/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/buzzer.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/embedded-usb-controller/buzzer.circuit.tsx)

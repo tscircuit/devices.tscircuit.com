@@ -1,8 +1,9 @@
 import React from "react"
 
-const release = "https://github.com/tscircuit/devices.tscircuit.com/releases/download/board-cad-2026-11-21"
+const original = "https://github.com/tscircuit/devices.tscircuit.com/releases/download/board-cad-2026-11-21"
 
 export default function CadDownloads({board}: {board: string}) {
+  const release = ["buzzer","motherboard"].includes(board) ? "https://github.com/tscircuit/devices.tscircuit.com/releases/download/embedded-boards-v1" : original
   return (
     <nav className="cad-downloads" aria-label="Download board CAD">
       <a href={release + "/" + board + ".glb"}>Download GLB</a>

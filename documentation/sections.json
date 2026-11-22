@@ -1,6 +1,6 @@
 [
   {"label":"Inputs","items":["button","toggle-switch","limit-switch","rotary-encoder","potentiometer","distance-sensor"]},
   {"label":"Outputs","items":["buzzer","flex-display"]},
-  {"label":"USB","items":["usb-hub","usb-resetter"]},
+  {"label":"USB","items":["motherboard","usb-hub","usb-resetter"]},
   {"label":"Prototypes","items":["compact-button","temperature-sensor","small-ips","ereader","video-player","large-rgb"]}
 ]

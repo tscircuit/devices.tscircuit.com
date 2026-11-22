@@ -37,7 +37,12 @@ export function startSerial(root, s, failed) {
   el("position").textContent = "—"
   el("raw").textContent = ""
   el("buzzer").hidden = s.kind !== "buzzer"
-  el("rate-field").hidden = !/^1\.([1-9]\d*)\./.test(s.version)
+  const passiveBuzzer = Number(s.version.split(".")[0]) >= 2
+  el("rate-field").hidden = !(passiveBuzzer || /^1\.([1-9]\d*)\./.test(s.version))
+  el("rate-label").textContent = passiveBuzzer ? "Frequency (Hz)" : "Modulation (Hz)"
+  el("rate").max = passiveBuzzer ? "4000" : "2000"
+  el("rate").placeholder = passiveBuzzer ? "4000" : "Off"
+  el("rate").value = ""
   log.textContent = ""
   record("DEVICE tscircuit " + s.kind + " " + s.version)
   s.onLine = line => {

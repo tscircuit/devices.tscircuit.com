@@ -26,6 +26,7 @@ const temp = await mkdtemp(join(tmpdir(), "device-sheets-"))
 try {
   for (const file of (await readdir(dir)).filter(f => f.endsWith(".circuit.tsx"))) {
     const slug = file.replace(".circuit.tsx", "")
+    if (process.argv.length > 2 && !process.argv.slice(2).includes(slug)) continue
     const assetDir = join(dir, "../static/img/devices", slug)
     const raw = join(temp, slug + ".svg")
     await $`tsci export ${join(dir,file)} --drawing mounting -o ${raw}`.cwd(dir)

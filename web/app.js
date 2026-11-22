@@ -4,10 +4,12 @@ import {identifySerial} from "./serial.js"
 import {startRanging, startSerial} from "./device-controls.js"
 
 const names = {
+  motherboard: "Embedded motherboard",
   encoder: "Rotary encoder", potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
   button: "Button", toggle: "Toggle switch", limit: "Limit switch", buzzer: "Buzzer", resetter: "USB resetter"
 }
 const serialIds = {
+  motherboard: {usbVendorId: 0x1a86, usbProductId: 0x7523},
   toggle: {usbVendorId: 0x1a86, usbProductId: 0x7523},
   ch552: {usbVendorId: 0x1209, usbProductId: 0xc550},
   resetter: {usbVendorId: 0x2e8a, usbProductId: 0x000a}
@@ -67,7 +69,7 @@ async function disconnect(card, error) {
 async function openDevice(handle, usb, requested) {
   if (!usb) {
     const info = handle.getInfo()
-    if (info.usbVendorId === serialIds.toggle.usbVendorId && info.usbProductId === serialIds.toggle.usbProductId) return openSwitch(handle, requested, false)
+    if (isContactSwitch(requested) && info.usbVendorId === serialIds.toggle.usbVendorId && info.usbProductId === serialIds.toggle.usbProductId) return openSwitch(handle, requested, false)
     return Object.assign(await identifySerial(handle), {handle})
   }
   if (handle.vendorId === usbIds.toggle.vendorId && handle.productId === usbIds.toggle.productId) return openSwitch(handle, requested, true)
@@ -172,7 +174,7 @@ async function restore(handle, usb) {
     : info.usbVendorId === serialIds.toggle.usbVendorId && info.usbProductId === serialIds.toggle.usbProductId
   if (switchHandle) {
     const target = cards.get(remembered.get(handle))
-    if (target && isContactSwitch(target.saved.kind) && !target.session && usesUsb(target.saved.kind) === usb)
+    if (target && (isContactSwitch(target.saved.kind) || target.saved.kind === "motherboard") && !target.session && usesUsb(target.saved.kind) === usb)
       await attach(handle, usb, {requested:target.saved.kind, target, restoring:true}).catch(() => {})
     return
   }

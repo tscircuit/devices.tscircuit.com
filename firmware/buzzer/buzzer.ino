@@ -1,4 +1,4 @@
-// CH552E, 24 MHz internal. P1.4 drives the buzzer MOSFET, P1.5 sinks the LED.
+// CH552E, 24 MHz internal. P1.4 drives the AC-coupled passive piezo, P1.5 sinks the LED.
 #include "src/userUsbCdc/USBCDC.h"
 #include "frame.h"
 #include <string.h>
@@ -16,7 +16,7 @@ static void stopTimer(void) {
   TF2 = 0;
 }
 
-static void beep(uint16_t ms) {
+static void armDuration(uint16_t ms) {
   stopTimer();
   started = millis();
   duration = ms;
@@ -26,13 +26,18 @@ static void beep(uint16_t ms) {
 // Timer 2 auto-reloads at F_CPU/12. Each interrupt is one half period.
 static void squareWave(uint16_t hz, uint16_t ms) {
   uint16_t reload = 0 - (uint16_t)((F_CPU / 24UL + hz / 2) / hz);
-  beep(ms);
+  armDuration(ms);
   T2CON = 0;
   T2MOD &= ~bT2_CLK;
   RCAP2H = TH2 = reload >> 8;
   RCAP2L = TL2 = reload & 0xff;
   ET2 = 1;
   TR2 = 1;
+}
+
+static void beep(uint16_t ms) {
+  if (ms) squareWave(4000, ms);
+  else armDuration(0);
 }
 
 static bool number(const char *text, uint16_t *value) {
@@ -57,9 +62,9 @@ static void command(void) {
   uint16_t ms = 0;
   uint16_t hz;
   char *arg;
-  if (!strcmp(line, "id")) reply("DEVICE tscircuit buzzer 1.1.0");
+  if (!strcmp(line, "id")) reply("DEVICE tscircuit buzzer 2.0.0");
   else if (!strcmp(line, "help") || !strcmp(line, "?"))
-    reply("id | help | beep [0-10000 ms, default 250] | tone <20-2000 Hz> <1-10000 ms> | stop | status | led on | led off");
+    reply("id | help | beep [0-10000 ms, default 250] | tone <20-4000 Hz> <1-10000 ms> | stop | status | led on | led off");
   else if (!strcmp(line, "status")) reply(duration ? "STATUS buzzing" : "STATUS idle");
   else if (!strcmp(line, "led on") || !strcmp(line, "led off")) {
     P1_5 = !strcmp(line, "led off");
@@ -73,8 +78,8 @@ static void command(void) {
   } else if (!strncmp(line, "tone ", 5)) {
     arg = strchr(line + 5, ' ');
     if (arg) *arg++ = 0;
-    if (!arg || !number(line + 5, &hz) || hz < 20 || hz > 2000 ||
-        !number(arg, &ms) || ms == 0) reply("ERR tone <20-2000 Hz> <1-10000 ms>");
+    if (!arg || !number(line + 5, &hz) || hz < 20 || hz > 4000 ||
+        !number(arg, &ms) || ms == 0) reply("ERR tone <20-4000 Hz> <1-10000 ms>");
     else { squareWave(hz, ms); reply("OK"); }
   } else reply("ERR unknown command; try help");
 }
