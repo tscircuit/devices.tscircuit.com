@@ -1,0 +1,53 @@
+---
+title: USB-C speaker
+description: Play sound through an 8 ohm plug-in speaker. Includes connector pinout, mounting dimensions and board CAD.
+---
+
+import CadDownloads from "@site/src/components/CadDownloads"
+
+<img id="3d-render" className="device-render" src="/docs/img/devices/speaker/render.png" alt="USB-C speaker board with a white two-pin speaker socket opposite the USB-C port" />
+
+Plug the speaker into **J2**, connect the board to a computer with a USB-C data cable, and select **USB AUDIO DAC** in the computer’s sound output settings. Music, voice and notification sounds play through the speaker. The board mixes left and right into mono.
+
+<CadDownloads board="speaker" />
+
+## Playback test
+
+Start at low system volume. Play the short chime below to check that the sound comes from the attached speaker. The player uses your computer’s selected output.
+
+<audio controls preload="none" aria-label="Play a two-note speaker test" src="/docs/img/devices/speaker/test.wav" />
+
+## Speaker connection
+
+J2 accepts the **Same Sky CMS-23558N-L152B**, the 8 Ω, 1 W speaker used for the tscircuitboy advance. The 23 mm diameter speaker is 5.5 mm thick. Its 152 mm lead ends in a two-pin, 1 mm-pitch JST-SH plug. The matching board header is **BM02B-SRSS-TB**. Align the keyed housings and press the plug straight down. Allow room above J2 to remove the plug and leave an opening in the enclosure over the speaker.
+
+| J2 pin | Speaker wire | Signal |
+| --- | --- | --- |
+| 1 | Red | Speaker + |
+| 2 | Black | Speaker − |
+
+Both wires are driven by the amplifier. Keep both isolated from enclosure ground. The speaker’s 1 W rating describes its power handling. This board limits gain for a low-power USB port.
+
+[Speaker dimensions and cable drawing (PDF)](https://www.sameskydevices.com/product/resource/cms-23558n-l152.pdf)
+
+## Protocol
+
+The computer’s USB Audio Class 1 driver handles playback and identification. Use the normal audio output API in an app. The embedded motherboard would need a USB Audio host driver to stream to this board.
+
+| Operation | Host interface | Device behavior |
+| --- | --- | --- |
+| Identify | Enumerate USB devices | Reports **USB AUDIO DAC**, VID `08BB`, PID `27C4`. |
+| Play audio | Select the playback output and stream PCM | Accepts 16-bit stereo at 32, 44.1 or 48 kHz. Both channels feed the speaker. |
+| Set volume | System or application volume control | Adjusts playback level. |
+| Mute | System mute control | Silences the speaker. |
+| Suspend | USB bus suspend | Disables the amplifier. |
+
+[USB audio interface datasheet](https://www.ti.com/lit/ds/symlink/pcm2704c.pdf) · [Amplifier datasheet](https://www.diodes.com/assets/Datasheets/PAM8302A.pdf)
+
+## Mounting
+
+The PCB is **26 × 30 × 1.6 mm**. The assembled CAD model extends **4.3 mm above** the top PCB surface and **0.8 mm below** the bottom surface, before plugging in the speaker. Four **Ø2.2 mm** holes accept M2 screws on a **20 × 20 mm** grid. With J1 at the bottom and the components facing you, the hole centres are at X = 3 and 23 mm, Y = 2.5 and 22.5 mm, measured from the lower-left corner.
+
+<a href="/docs/img/devices/speaker/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/speaker/mounting.svg" alt="Top and isometric views with board dimensions and 20 mm hole pitch on both axes" /></a>
+
+<a href="/docs/img/devices/speaker/mounting.svg">Full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/speaker.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/usb-speaker/new-devices/speaker.circuit.tsx) · [Prototype fabrication files](https://github.com/tscircuit/devices.tscircuit.com/releases/download/usb-speaker-v1/speaker-prototype.zip)
