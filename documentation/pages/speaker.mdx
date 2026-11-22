@@ -5,9 +5,11 @@ description: Play sound through an 8 ohm plug-in speaker. Includes connector pin
 
 import CadDownloads from "@site/src/components/CadDownloads"
 
-<img id="3d-render" className="device-render" src="/docs/img/devices/speaker/render.png" alt="USB-C speaker board with a white two-pin speaker socket opposite the USB-C port" />
+<img id="3d-render" className="device-render" src="/docs/img/devices/speaker/render.png" alt="Assembled USB-C speaker with the 23 mm driver and its red and black leads plugged into J2" />
 
 Plug the speaker into **J2**, connect the board to a computer with a USB-C data cable, and select **USB AUDIO DAC** in the computer’s sound output settings. Music, voice and notification sounds play through the speaker. The board mixes left and right into mono.
+
+The CAD downloads contain the populated PCB. The assembly view above shows one way to route the speaker lead.
 
 <CadDownloads board="speaker" />
 
@@ -32,7 +34,7 @@ Both wires are driven by the amplifier. Keep both isolated from enclosure ground
 
 ## Protocol
 
-The computer’s USB Audio Class 1 driver handles playback and identification. Use the normal audio output API in an app. The embedded motherboard would need a USB Audio host driver to stream to this board.
+The computer’s USB Audio Class 1 driver handles playback and identification. Use the normal audio output API in an app. The RP2350 USB Motherboard would need a USB Audio host driver to stream to this board.
 
 | Operation | Host interface | Device behavior |
 | --- | --- | --- |
@@ -46,8 +48,8 @@ The computer’s USB Audio Class 1 driver handles playback and identification. U
 
 ## Mounting
 
-The PCB is **26 × 30 × 1.6 mm**. The assembled CAD model extends **4.3 mm above** the top PCB surface and **0.8 mm below** the bottom surface, before plugging in the speaker. Four **Ø2.2 mm** holes accept M2 screws on a **20 × 20 mm** grid. With J1 at the bottom and the components facing you, the hole centres are at X = 3 and 23 mm, Y = 2.5 and 22.5 mm, measured from the lower-left corner.
+The PCB is **26 × 30 × 1.6 mm**. All components mount on top of the two-layer board. J2 reaches **4.3 mm above** the PCB before the speaker is plugged in. Four **Ø2.2 mm** holes accept M2 screws on a **20 × 20 mm** grid. With J1 at the bottom and the components facing you, the hole centres are at X = 3 and 23 mm, Y = 2.5 and 22.5 mm, measured from the lower-left corner.
 
 <a href="/docs/img/devices/speaker/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/speaker/mounting.svg" alt="Top and isometric views with board dimensions and 20 mm hole pitch on both axes" /></a>
 
-<a href="/docs/img/devices/speaker/mounting.svg">Full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/speaker.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/usb-speaker/new-devices/speaker.circuit.tsx) · [Prototype fabrication files](https://github.com/tscircuit/devices.tscircuit.com/releases/download/usb-speaker-v1/speaker-prototype.zip)
+<a href="/docs/img/devices/speaker/mounting.svg">Full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/speaker.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/top-side-assembly/new-devices/speaker.circuit.tsx) · [Prototype fabrication files](https://github.com/tscircuit/devices.tscircuit.com/releases/download/top-side-boards-v1/speaker-prototype.zip)

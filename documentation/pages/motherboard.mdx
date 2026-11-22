@@ -1,11 +1,11 @@
 ---
-title: Embedded motherboard
-description: Mounting, power and USB host protocol for the embedded motherboard.
+title: RP2350 USB Motherboard
+description: Mounting, power and USB host protocol for the RP2350 USB Motherboard.
 ---
 
 import CadDownloads from "@site/src/components/CadDownloads"
 
-<img id="3d-render" className="device-render" src="/docs/img/devices/motherboard/render.png" alt="Four-port embedded USB motherboard" />
+<img id="3d-render" className="device-render" src="/docs/img/devices/motherboard/render.png" alt="Four-port RP2350 USB Motherboard" />
 
 The motherboard runs a small program that can read and control USB devices inside a product. The included program lets a potentiometer select three drawings on a flex display.
 
@@ -15,11 +15,11 @@ The motherboard runs a small program that can read and control USB devices insid
 
 Supply regulated 5 V and ground at the underside power pads. Connect a potentiometer and a flex display to any two of the four downstream ports. Turn the knob to select a circle, diagonal stripe or checkerboard. The controller starts on product power and runs with the computer unplugged.
 
-To inspect the program, connect the separate **Computer** port and select **Add device → Embedded motherboard**. The computer port powers the service interface. Keep product power connected to run the controller. Load the first firmware over the underside SWD pads. Each downstream device has a 100 mA design budget. Power and USB operation await first-article testing.
+To inspect the program, connect the separate **Computer** port and select **Add device → RP2350 USB Motherboard**. The computer port powers the service interface. Keep product power connected to run the controller. Load the first firmware over the underside SWD pads. Each downstream device has a 100 mA design budget. Power and USB operation await first-article testing.
 
 The first firmware discovers USB CDC serial devices. The standalone program handles the potentiometer and flex display. The distance sensor and contact-switch boards use different USB interfaces and need additional host drivers.
 
-[Download the SWD firmware](https://github.com/tscircuit/devices.tscircuit.com/releases/download/embedded-boards-v1/motherboard-1.0.0.elf) · [Prototype fabrication files](https://github.com/tscircuit/devices.tscircuit.com/releases/download/embedded-boards-v1/motherboard-prototype.zip)
+[Download the SWD firmware](https://github.com/tscircuit/devices.tscircuit.com/releases/download/embedded-boards-v1/motherboard-1.0.0.elf) · [Prototype fabrication files](https://github.com/tscircuit/devices.tscircuit.com/releases/download/top-side-boards-v1/motherboard-prototype.zip)
 
 ## Protocol
 
@@ -34,8 +34,8 @@ Open the computer service port at 115200 baud. Send one ASCII command per line e
 
 ## Mounting
 
-The PCB is **46 × 46 × 1.6 mm**. Its four Ø2.2 mm holes fit M2 screws on a **40 × 10 mm** pattern. With the four downstream connectors at the top, the holes are 3 and 43 mm from the left edge, and 18 and 28 mm from the bottom edge. The modeled assembly extends **5.4 mm above the top face** at the port capacitors and **2.55 mm below the bottom face** at the processor module. Allow additional room for component tolerances, solder and the power harness.
+The PCB is **80 × 46 × 1.6 mm**. All components mount on top, including the processor module. The four Ø2.2 mm holes accept M2 screws on a **70 × 40 mm** grid. With the downstream ports at the top, the hole centres are X = 2 and 72 mm, Y = 3 and 43 mm, measured from the lower-left corner. Allow access underneath for the product power wires and programming pads.
 
-<a href="/docs/img/devices/motherboard/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/motherboard/mounting.svg" alt="Mounting dimensions and isometric view of the embedded motherboard" /></a>
+<a href="/docs/img/devices/motherboard/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/motherboard/mounting.svg" alt="Mounting dimensions and isometric view of the RP2350 USB Motherboard" /></a>
 
-[PCB and firmware source](https://github.com/tscircuit/basic-usbc-devices/tree/embedded-usb-controller/motherboard) · [Mounting drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/motherboard.circuit.tsx)
+[PCB and firmware source](https://github.com/tscircuit/basic-usbc-devices/tree/top-side-assembly/motherboard) · [Mounting drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/motherboard.circuit.tsx)

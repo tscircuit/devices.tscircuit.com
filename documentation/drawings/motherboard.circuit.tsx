@@ -1,28 +1,28 @@
 import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
-  "title": "Embedded motherboard",
+  "title": "RP2350 USB Motherboard",
   "usbEdge": "bottom",
-  "width": 46,
+  "width": 80,
   "height": 46,
   "thickness": 1.6,
   "diameter": 2.2,
   "holes": [
     [
-      -20,
-      -5
+      -38,
+      -20
     ],
     [
-      -20,
-      5
+      -38,
+      20
     ],
     [
-      20,
-      -5
+      32,
+      -20
     ],
     [
-      20,
-      5
+      32,
+      20
     ]
   ]
 } as const

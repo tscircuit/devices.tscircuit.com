@@ -4,7 +4,7 @@ import {identifySerial} from "./serial.js"
 import {startRanging, startSerial} from "./device-controls.js"
 
 const names = {
-  motherboard: "Embedded motherboard",
+  motherboard: "RP2350 USB Motherboard",
   encoder: "Rotary encoder", potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
   button: "Button", toggle: "Toggle switch", limit: "Limit switch", buzzer: "Buzzer", resetter: "USB resetter"
 }

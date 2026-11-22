@@ -11,11 +11,11 @@ A microSD-backed controller designed for local video playback on the 3.5-inch ER
 
 <CadDownloads board="video-player" />
 
-**Modeled component height: approximately 3.3 mm above the component-side PCB surface.** The CAD files show the populated carrier. Allow separate space for the panel and flex cable. The microSD socket also projects below the board.
+**Modeled component height: 3.5 mm above the top PCB surface.** All components mount on the top side of the four-layer carrier. The tallest inductors have a ±0.2 mm height tolerance. Allow separate space for the panel and flex cable.
 
 ## Usage
 
-Fit the bare panel and a microSD card, leaving access to the socket on the reverse side of the PCB. The design targets 30 full frames per second. Playback at that rate still needs firmware and an end-to-end measurement on hardware.
+Fit the bare panel and a microSD card, leaving access to the socket on the left edge of the component side. The design targets 30 full frames per second. Playback at that rate still needs firmware and an end-to-end measurement on hardware.
 
 ## Protocol
 
@@ -31,8 +31,8 @@ The 30 fps design target requires 9.216 MB/s of pixel data. The USB frame comman
 
 ## Mounting
 
-The PCB measures **48 × 48 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **40 × 30 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 4, 44 mm and Y = 9, 39 mm.
+The PCB measures **56 × 48 mm**, with **4 × Ø2.2 mm** clearance holes for M2 screws. The centre-to-centre spacing is **40 × 30 mm**. Orient the component side with the **J1 USB-C port at the bottom**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 8, 48 mm and Y = 9, 39 mm.
 
 <a href="/docs/img/devices/video-player/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/video-player/mounting.svg" alt="Dimensioned component-side view and isometric views of the 3.5-inch video player with its 4 mounting holes" /></a>
 
-<a href="/docs/img/devices/video-player/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/video-player.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/p4-display/video-player.circuit.tsx)
+<a href="/docs/img/devices/video-player/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/video-player.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/top-side-assembly/p4-display/video-player.circuit.tsx) · [Prototype Gerbers and drills](https://github.com/tscircuit/devices.tscircuit.com/releases/download/top-side-boards-v1/video-player-gerbers.zip)
