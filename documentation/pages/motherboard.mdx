@@ -7,7 +7,7 @@ import CadDownloads from "@site/src/components/CadDownloads"
 
 <img id="3d-render" className="device-render" src="/docs/img/devices/motherboard/render.png" alt="Four-port RP2350 USB Motherboard" />
 
-The board carries a directly mounted RP2350A, 16 MB of flash and a 12 MHz crystal. It hosts up to four USB devices through the onboard hub. J2–J5 are the four device sockets. The included program lets a potentiometer select three drawings on a flex display.
+The board carries a directly mounted RP2350A, 16 MiB of flash and a 12 MHz crystal. It hosts up to four USB devices through the onboard hub. J2–J5 are the four device sockets. The included program lets a potentiometer select three drawings on a flex display.
 
 <CadDownloads board="motherboard" />
 
@@ -17,24 +17,21 @@ Supply regulated 5 V and ground at the underside power pads. Slide **POWER** to 
 
 Each downstream device has a 100 mA design budget. The example discovers USB CDC serial devices and supports the potentiometer and flex display. The distance sensor and contact-switch boards require additional host drivers.
 
-## Programming and USB modes
+## Removable storage
 
-Keep product power **ON** in both modes. Inside the enclosure, a miniature two-position service slider selects RUN or PROGRAM. Disconnect the computer cable before moving it.
+Insert a microSD card from the right edge. With the board powered, send `sd` in the console to check that the motherboard can read the card's filesystem. FAT32 and exFAT are supported. The program and its USB drivers stay in the onboard flash. The example generates its three drawings and runs with the card removed. Playing files from the card requires application code.
 
-| Service slider | J1 computer port | Four device ports |
-| --- | --- | --- |
-| **RUN** | 115200-baud console. Select **Add device → RP2350 USB Motherboard**. | The RP2350 hosts devices on J2–J5. |
-| **PROGRAM** | Direct USB connection to the RP2350 for a UF2 update. | The hub is disconnected from the processor. |
+## Programming over SWD
 
-1. Select **PROGRAM** and connect J1 to your computer. Firmware 1.1.0 enters the USB bootloader automatically.
-2. Copy the [motherboard UF2](https://github.com/tscircuit/devices.tscircuit.com/releases/download/direct-rp2350a-switches-v1/rp2350-motherboard-1.1.0.uf2) to the **RP2350** drive.
-3. Disconnect J1, select **RUN**, and press **RESET** to start the program.
+1. Connect the board's regulated 5 V product supply and switch **POWER** on.
+2. Connect the [standard JST programmer](https://github.com/tscircuit/standard-jst-programmer) to your computer. Use a straight-through five-wire JST SH cable from its five-pin port to **J_SWD** on the motherboard.
+3. Download the [motherboard firmware ELF](https://github.com/tscircuit/devices.tscircuit.com/releases/download/swd-microsd-motherboard-v1/motherboard.elf). With Raspberry Pi's RP2350-capable OpenOCD, run the following command from the download directory.
 
-**Recovery with blank flash or custom firmware.** With J1 unplugged and PROGRAM selected, hold **BOOT**, tap **RESET**, then release **BOOT** and reconnect J1.
+```sh
+openocd -f interface/cmsis-dap.cfg -c "transport select swd" -c "adapter speed 1000" -f target/rp2350.cfg -c "program motherboard.elf verify reset exit"
+```
 
-**SWD.** The underside pads provide 3.3 V reference, SWDIO, SWCLK and ground. Apply product power and select RUN to debug the example. [Download the SWD ELF](https://github.com/tscircuit/devices.tscircuit.com/releases/download/direct-rp2350a-switches-v1/motherboard.elf)
-
-The CAD downloads show the placed assembly for enclosure design. PCB routing and first-article electrical testing are pending. [Routing status](https://github.com/tscircuit/tscircuit-autorouter/pull/4144) Earlier boards fitted with a processor module use SWD for programming.
+J_SWD is a top-entry, five-pin JST SH connector on 1 mm pitch (BM05B-SRSS-TB). Contact 1 leaves programmer power isolated. Contacts 2 through 5 carry SWDIO, ground, SWCLK and active-low reset respectively. J1 remains available as the runtime console.
 
 ## Protocol
 
@@ -42,15 +39,20 @@ Open the computer service port at 115200 baud. Send one ASCII command per line e
 
 | Command | Purpose | Reply |
 | --- | --- | --- |
-| `id` | Identify the controller. | `DEVICE tscircuit motherboard 1.1.0` |
+| `id` | Identify the controller. | `DEVICE tscircuit motherboard 1.2.0` |
 | `help` | List commands. | One line of command names. |
 | `devices` | List the connected serial interfaces. | One `PORT` line per interface, followed by `OK`. |
 | `status` | Read the selected drawing. | `SCENE 1`, `2` or `3`. Zero means the controller is waiting for a reading. |
+| `sd` | Read the removable card’s filesystem. | `SD FAT32`, `SD exFAT` or the detected FAT variant. A mount failure returns `ERR sd <FatFs result number>`. |
 
 ## Mounting
 
-The PCB is **80 × 46 × 1.6 mm**. All components mount on top. Both switches rise **1.4 mm** above the PCB. The tallest assembled parts rise **5.4 mm**. The service slider sits inside the enclosure. Give the edge-facing POWER slider an opening on the same side as J1 and allow 1.5 mm of sliding travel. The four Ø2.2 mm holes accept M2 screws on a **70 × 40 mm** grid. With the downstream ports at the top, the hole centres are X = 2 and 72 mm, Y = 3 and 43 mm, measured from the lower-left corner. Allow access underneath for the product power wires and programming pads.
+The PCB is **88 × 46 × 1.6 mm**. Four Ø2.2 mm holes accept M2 screws on an **80 × 40 mm** grid. With the downstream USB ports at the top, the hole centres are X = 4 and 84 mm, Y = 3 and 43 mm from the lower-left corner.
 
-<a href="/docs/img/devices/motherboard/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/motherboard/mounting.svg" alt="Mounting holes and USB-C ports. J1 console/program at the bottom and downstream ports J2–J5 along the top." /></a>
+The power lever projects **4.75 mm past the J1 edge** and slides parallel to that edge. The assembled board is 50.75 mm deep including the lever. Allow 5.4 mm above the PCB for the tallest components and 1.9 mm below it for the switch leads, plus clearance for the power wires. Leave an opening on the right for the card and access above J_SWD for the programmer cable.
+
+The CAD downloads show the placed assembly. Copper routing and first-article testing are pending. [Routing handoff](https://github.com/tscircuit/basic-usbc-devices/blob/top-side-assembly/AUTOROUTER-HANDOFF.md)
+
+<a href="/docs/img/devices/motherboard/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/motherboard/mounting.svg" alt="Mounting holes and USB-C ports. J1 console at the bottom and downstream ports J2–J5 along the top." /></a>
 
 [PCB and firmware source](https://github.com/tscircuit/basic-usbc-devices/tree/top-side-assembly/motherboard) · [Mounting drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/motherboard.circuit.tsx)

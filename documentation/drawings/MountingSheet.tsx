@@ -6,10 +6,12 @@ export interface UsbPort {
   x: number
   y: number
   edge: "top" | "bottom" | "left" | "right"
+  labelOffset?: readonly [number, number]
   role?: string
 }
 
 export interface Mount {
+  swdHeader?: boolean
   undersidePads?: string
   controls?: readonly { ref: string, label: string, x: number, y: number, labelX: number, labelY: number }[]
   speakerHeader?: { x: number, y: number }
@@ -49,6 +51,7 @@ export function MountingSheet({mount, modelFile, modelRevision = originalModels}
     [...new Set(holes.map(point => +(point[axis] + size / 2).toFixed(3)))].join(", ")
   const topPorts = mount.usbPorts.filter(port => port.edge === "top")
   const portLabel = (port: UsbPort) => {
+    if (port.labelOffset) return { xOffsetFromViewCenter: port.labelOffset[0], yOffsetFromViewCenter: port.labelOffset[1] }
     const topIndex = topPorts.indexOf(port)
     if (port.edge === "top") return {
       xOffsetFromViewCenter: topPorts.length === 1 ? 10 : -38 + topIndex * 20,
@@ -113,6 +116,11 @@ export function MountingSheet({mount, modelFile, modelRevision = originalModels}
           <assembly.drawing.note key={port.ref} text={port.ref + " USB-C · " + port.role}
             paperX={-28 + Math.floor(i / 3) * 74} paperY={-61 - (i % 3) * 9} fontSize={3.6} />
         ))}
+        {mount.swdHeader && <>
+          <assembly.drawing.note text="J_SWD · JST SH · 5 pins · 1 mm" paperX={98} paperY={-61} fontSize={3.6} />
+          <assembly.drawing.note text="Top entry · BM05B-SRSS-TB" paperX={100} paperY={-70} fontSize={3.4} />
+          <assembly.drawing.note text="1 NC · 2 SWDIO · 3 GND · 4 SWCLK · 5 RESET" paperX={100} paperY={-79} fontSize={2.9} />
+        </>}
         {mount.undersidePads && <>
           <assembly.drawing.note text="SWD · underside pads" paperX={104} paperY={-61} fontSize={3.8} />
           <assembly.drawing.note text={mount.undersidePads} paperX={104} paperY={-70} fontSize={3.0} />
