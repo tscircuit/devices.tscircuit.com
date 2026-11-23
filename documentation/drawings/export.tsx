@@ -1,30 +1,35 @@
-import { readdir, readFile, writeFile } from "node:fs/promises"
+import { readdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
+import { fileURLToPath } from "node:url"
+import { Circuit } from "tscircuit"
+import { renderMountingSheet } from "./render-mounting-sheet"
 
-const dir = import.meta.dir
-const shared = await readFile(join(dir, "MountingSheet.tsx"), "utf8")
+const dir = fileURLToPath(new URL(".", import.meta.url))
 const requested = process.argv.slice(2)
 for (const file of (await readdir(dir)).sort()) {
   if (!file.endsWith(".circuit.tsx")) continue
   const slug = file.replace(".circuit.tsx", "")
   if (requested.length && !requested.includes(slug)) continue
 
-  const response = await fetch("https://svg.tscircuit.com/?svg_type=drawing&drawing=mounting", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      fs_map: {"MountingSheet.tsx": shared, [file]: await readFile(join(dir, file), "utf8")},
-      main_component_path: file,
-    }),
-  })
-  if (!response.ok || !response.headers.get("content-type")?.includes("image/svg+xml")) {
-    throw new Error(slug + ": drawing export failed (" + response.status + ") " + await response.text())
+  const { default: Drawing } = await import(join(dir, file))
+  const circuit = new Circuit()
+  circuit.add(<Drawing />)
+  await circuit.renderUntilSettled()
+  const elements = circuit.getCircuitJson()
+  const errors = elements.filter(e => e.type.endsWith("_error"))
+  if (errors.length) throw new Error(slug + ": " + JSON.stringify(errors))
+
+  const svg = await renderMountingSheet(elements)
+  for (const [type, attribute] of [
+    ["drawing_part_view", "data-drawing-part-view-id"],
+    ["drawing_part_label", "data-part-label"],
+    ["drawing_dimension_line", "data-drawing-dimension-line-id"],
+  ] as const) {
+    const expected = elements.filter(e => e.type === type).length
+    const actual = svg.split(attribute + "=").length - 1
+    if (!expected || actual !== expected)
+      throw new Error(`${slug}: expected ${expected} ${type} elements, received ${actual}`)
   }
-  const bytes = await response.bytes()
-  const svg = new TextDecoder().decode(bytes)
-  if (!svg.includes("data-part-label") || !svg.includes("data-drawing-dimension-line-id")) {
-    throw new Error(slug + ": native drawing is missing connector labels or dimensions")
-  }
-  await writeFile(join(dir, "../static/img/devices", slug, "mounting.svg"), bytes)
+  await writeFile(join(dir, "../static/img/devices", slug, "mounting.svg"), svg)
   console.log("Exported", slug)
 }

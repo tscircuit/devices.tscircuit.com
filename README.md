@@ -82,9 +82,10 @@ Each file in `documentation/drawings/*.circuit.tsx` contains the board outline, 
 Run the following in `documentation/drawings` to regenerate every sheet. Pass device names to export a subset, for example `bun export.tsx motherboard speaker`.
 
 ```sh
+bun install --frozen-lockfile
 bun export.tsx
 ```
 
-The script sends the device TSX and shared `MountingSheet.tsx` to the official drawing endpoint at `svg.tscircuit.com` and writes its response verbatim. Each sheet uses native part views, dimensions, part labels and page notes. The connector and isometric views share the populated GLB. When revising a model, commit the GLB in `models/` and update the pinned model revision in `MountingSheet.tsx`.
+The script compiles each TSX sheet with the version of tscircuit pinned in the drawings package. It loads the carrier and populated model, renders the Circuit JSON locally with `@tscircuit/circuit-json-to-drawing`, and saves the native SVG after checking the views, labels and dimensions. Each sheet uses native part views, dimensions, part labels and page notes. The connector and isometric views share the populated GLB. When revising a model, commit the GLB in `models/` and update the pinned model revision in `MountingSheet.tsx`.
 
 The device pages link to the [versioned CAD downloads](https://github.com/tscircuit/devices.tscircuit.com/releases/tag/board-cad-2026-11-21). Downloadable GLBs use glTF’s meter units and include the populated board. STEP assemblies use millimeters with the PCB midplane at Z = 0. Actuator heights on the device pages and mounting sheets are measured from the component-side surface of the PCB.

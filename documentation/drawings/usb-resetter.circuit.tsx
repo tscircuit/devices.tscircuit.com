@@ -4,7 +4,7 @@ export const mount = {
   title: "USB resetter · compact revision",
   usbPorts: [
     { ref: "J1", x: 4, y: 14.74, edge: "top", role: "Control" },
-    { ref: "J2", x: -17.74, y: -1.2, edge: "left", role: "Switched output" },
+    { ref: "J2", x: -17.74, y: -1.2, edge: "left", role: "Switched output", labelOffset: [-38, -34] },
     { ref: "J3", x: 17.74, y: -1.2, edge: "right", role: "Passthrough input" },
   ],
   controls: [

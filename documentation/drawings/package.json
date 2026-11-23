@@ -2,8 +2,14 @@
   "name": "device-mounting-drawings",
   "private": true,
   "dependencies": {
-    "tscircuit": "0.0.3271",
+    "@tscircuit/circuit-json-to-drawing": "https://jscdn.tscircuit.com/@tscircuit/circuit-json-to-drawing/0.0.10.tgz",
+    "@tscircuit/footprinter": "0.0.451",
+    "circuit-json": "0.0.560",
+    "circuit-json-to-gltf": "0.0.164",
+    "gl-matrix": "3.4.4",
+    "poppygl": "0.0.40",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "tscircuit": "0.0.3288"
   }
 }

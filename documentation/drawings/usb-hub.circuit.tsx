@@ -5,9 +5,9 @@ export const mount = {
   usbPorts: [
     { ref: "J1", x: 0, y: -20.59, edge: "bottom", role: "Upstream" },
     { ref: "J2", x: -16.2, y: 20.59, edge: "top", role: "Downstream" },
-    { ref: "J3", x: -5.4, y: 20.59, edge: "top", role: "Downstream" },
+    { ref: "J3", labelOffset: [-18, 58], x: -5.4, y: 20.59, edge: "top", role: "Downstream" },
     { ref: "J4", x: 5.4, y: 20.59, edge: "top", role: "Downstream" },
-    { ref: "J5", x: 16.2, y: 20.59, edge: "top", role: "Downstream" },
+    { ref: "J5", labelOffset: [22, 58], x: 16.2, y: 20.59, edge: "top", role: "Downstream" },
   ],
   "width": 44,
   "height": 42,
