@@ -10,6 +10,8 @@ export interface UsbPort {
 }
 
 export interface Mount {
+  undersidePads?: string
+  controls?: readonly { ref: string, label: string, x: number, y: number, labelX: number, labelY: number }[]
   speakerHeader?: { x: number, y: number }
   title: string
   heightNote?: string
@@ -22,10 +24,11 @@ export interface Mount {
 }
 
 // The populated meshes were exported with both in-plane axes reversed.
-const modelDirectory = "https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/fbd66fb9b68e6f47f96029c59ad1bc9fab6c7b26/documentation/drawings/models"
+const originalModels = "fbd66fb9b68e6f47f96029c59ad1bc9fab6c7b26"
 
 
-export function MountingSheet({mount, modelFile}: {mount: Mount, modelFile: string}) {
+export function MountingSheet({mount, modelFile, modelRevision = originalModels}: {mount: Mount, modelFile: string, modelRevision?: string}) {
+  const modelDirectory = "https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/" + modelRevision + "/documentation/drawings/models"
   const {width, height, thickness, diameter, holes} = mount
   // For each pitch, pick the extreme holes nearest the top or right dimension.
   const pitch = (axis: 0 | 1) => {
@@ -83,6 +86,11 @@ export function MountingSheet({mount, modelFile}: {mount: Mount, modelFile: stri
               text={mount.usbPorts.length === 1 ? port.ref + " USB-C" : port.ref}
               anchor={{x: port.x, y: port.y, z: thickness/2 + 2}} {...portLabel(port)} />
           ))}
+          {mount.controls?.map(control => (
+            <assembly.drawing.partlabel key={control.ref} name={control.ref} partRefs={[".populated"]}
+              text={control.label} anchor={{x: control.x, y: control.y, z: thickness/2 + 2}}
+              xOffsetFromViewCenter={control.labelX} yOffsetFromViewCenter={control.labelY} />
+          ))}
           {mount.speakerHeader && (
             <assembly.drawing.partlabel partRefs={[".populated"]} text="J2 · JST SH"
               anchor={{x: mount.speakerHeader.x, y: mount.speakerHeader.y, z: thickness/2 + 2.5}}
@@ -105,6 +113,10 @@ export function MountingSheet({mount, modelFile}: {mount: Mount, modelFile: stri
           <assembly.drawing.note key={port.ref} text={port.ref + " USB-C · " + port.role}
             paperX={-28 + Math.floor(i / 3) * 74} paperY={-61 - (i % 3) * 9} fontSize={3.6} />
         ))}
+        {mount.undersidePads && <>
+          <assembly.drawing.note text="SWD · underside pads" paperX={104} paperY={-61} fontSize={3.8} />
+          <assembly.drawing.note text={mount.undersidePads} paperX={104} paperY={-70} fontSize={3.0} />
+        </>}
         {mount.speakerHeader && <>
           <assembly.drawing.note text="J2  JST SH · 2 pins · 1 mm pitch · top entry" paperX={-28} paperY={-60} fontSize={3.8} />
           <assembly.drawing.note text="Board BM02B-SRSS-TB · Cable SHR-02V-S-B" paperX={-28} paperY={-70} fontSize={3.4} />
