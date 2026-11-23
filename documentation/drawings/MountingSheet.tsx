@@ -10,6 +10,7 @@ export interface UsbPort {
 }
 
 export interface Mount {
+  controls?: readonly { ref: string, label: string, x: number, y: number, labelX: number, labelY: number }[]
   speakerHeader?: { x: number, y: number }
   title: string
   heightNote?: string
@@ -22,10 +23,11 @@ export interface Mount {
 }
 
 // The populated meshes were exported with both in-plane axes reversed.
-const modelDirectory = "https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/7f0d761136554d8b8678c0baae401596f2de888a/documentation/drawings/models"
+const originalModels = "7f0d761136554d8b8678c0baae401596f2de888a"
 
 
-export function MountingSheet({mount, modelFile}: {mount: Mount, modelFile: string}) {
+export function MountingSheet({mount, modelFile, modelRevision = originalModels}: {mount: Mount, modelFile: string, modelRevision?: string}) {
+  const modelDirectory = "https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/" + modelRevision + "/documentation/drawings/models"
   const {width, height, thickness, diameter, holes} = mount
   // For each pitch, pick the extreme holes nearest the top or right dimension.
   const pitch = (axis: 0 | 1) => {
@@ -82,6 +84,11 @@ export function MountingSheet({mount, modelFile}: {mount: Mount, modelFile: stri
             <assembly.drawing.partlabel key={port.ref} name={port.ref} partRefs={[".populated"]}
               text={mount.usbPorts.length === 1 ? port.ref + " USB-C" : port.ref}
               anchor={{x: port.x, y: port.y, z: thickness/2 + 2}} {...portLabel(port)} />
+          ))}
+          {mount.controls?.map(control => (
+            <assembly.drawing.partlabel key={control.ref} name={control.ref} partRefs={[".populated"]}
+              text={control.label} anchor={{x: control.x, y: control.y, z: thickness/2 + 2}}
+              xOffsetFromViewCenter={control.labelX} yOffsetFromViewCenter={control.labelY} />
           ))}
           {mount.speakerHeader && (
             <assembly.drawing.partlabel partRefs={[".populated"]} text="J2 · JST SH"

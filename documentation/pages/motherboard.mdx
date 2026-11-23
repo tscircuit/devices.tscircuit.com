@@ -7,7 +7,7 @@ import CadDownloads from "@site/src/components/CadDownloads"
 
 <img id="3d-render" className="device-render" src="/docs/img/devices/motherboard/render.png" alt="Four-port RP2350 USB Motherboard" />
 
-The RP2350 hosts up to four USB devices through the onboard hub. J2–J5 are the four device sockets. The included program lets a potentiometer select three drawings on a flex display.
+The board carries a directly mounted RP2350A, 16 MB of flash and a 12 MHz crystal. It hosts up to four USB devices through the onboard hub. J2–J5 are the four device sockets. The included program lets a potentiometer select three drawings on a flex display.
 
 <CadDownloads board="motherboard" />
 
@@ -15,11 +15,26 @@ The RP2350 hosts up to four USB devices through the onboard hub. J2–J5 are the
 
 Supply regulated 5 V and ground at the underside power pads. Connect a potentiometer and a flex display to any two of the four downstream ports. Turn the knob to select a circle, diagonal stripe or checkerboard. The controller starts on product power and runs with the computer unplugged.
 
-To inspect the program, connect the separate **Computer** port and select **Add device → RP2350 USB Motherboard**. J1 powers the service interface and carries the serial console. Keep product power connected to run the controller. Program the current firmware through the underside SWD pads. J1 has no connection to the RP2350’s native USB data pins, so it cannot accept a BOOTSEL/UF2 upload. Each downstream device has a 100 mA design budget. Power and USB operation await first-article testing.
+Each downstream device has a 100 mA design budget. The example discovers USB CDC serial devices and supports the potentiometer and flex display. The distance sensor and contact-switch boards require additional host drivers.
 
-The first firmware discovers USB CDC serial devices. The standalone program handles the potentiometer and flex display. The distance sensor and contact-switch boards use different USB interfaces and need additional host drivers.
+## Programming and USB modes
 
-[Download the SWD firmware](https://github.com/tscircuit/devices.tscircuit.com/releases/download/embedded-boards-v1/motherboard-1.0.0.elf) · [Prototype fabrication files](https://github.com/tscircuit/devices.tscircuit.com/releases/download/top-side-boards-v1/motherboard-prototype.zip)
+Keep regulated product power connected in both modes. Disconnect the computer cable before moving the toggle.
+
+| Toggle | J1 computer port | Four device ports |
+| --- | --- | --- |
+| **RUN** | 115200-baud console. Select **Add device → RP2350 USB Motherboard**. | The RP2350 hosts devices on J2–J5. |
+| **PROGRAM** | Direct USB connection to the RP2350 for a UF2 update. | The hub is disconnected from the processor. |
+
+1. Select **PROGRAM** and connect J1 to your computer. Firmware 1.1.0 enters the USB bootloader automatically.
+2. Copy the [motherboard UF2](https://github.com/tscircuit/devices.tscircuit.com/releases/download/direct-rp2350a-v1/rp2350-motherboard-1.1.0.uf2) to the **RP2350** drive.
+3. Disconnect J1, select **RUN**, and press **RESET** to start the program.
+
+**Recovery with blank flash or custom firmware.** With J1 unplugged and PROGRAM selected, hold **BOOT**, tap **RESET**, then release **BOOT** and reconnect J1.
+
+**SWD.** The underside pads provide 3.3 V reference, SWDIO, SWCLK and ground. Apply product power and select RUN to debug the example. [Download the SWD ELF](https://github.com/tscircuit/devices.tscircuit.com/releases/download/direct-rp2350a-v1/motherboard.elf)
+
+This prototype revision awaits first-article power and USB testing. Earlier boards fitted with a processor module use SWD for programming.
 
 ## Protocol
 
@@ -27,15 +42,15 @@ Open the computer service port at 115200 baud. Send one ASCII command per line e
 
 | Command | Purpose | Reply |
 | --- | --- | --- |
-| `id` | Identify the controller. | `DEVICE tscircuit motherboard 1.0.0` |
+| `id` | Identify the controller. | `DEVICE tscircuit motherboard 1.1.0` |
 | `help` | List commands. | One line of command names. |
 | `devices` | List the connected serial interfaces. | One `PORT` line per interface, followed by `OK`. |
 | `status` | Read the selected drawing. | `SCENE 1`, `2` or `3`. Zero means the controller is waiting for a reading. |
 
 ## Mounting
 
-The PCB is **80 × 46 × 1.6 mm**. All components mount on top, including the processor module. The four Ø2.2 mm holes accept M2 screws on a **70 × 40 mm** grid. With the downstream ports at the top, the hole centres are X = 2 and 72 mm, Y = 3 and 43 mm, measured from the lower-left corner. Allow access underneath for the product power wires and programming pads.
+The PCB is **80 × 46 × 1.6 mm**. All components mount on top. The toggle model extends 26.5 mm above the top surface and its solder tails extend 1.9 mm below the underside. Allow room for lever travel. The four Ø2.2 mm holes accept M2 screws on a **70 × 40 mm** grid. With the downstream ports at the top, the hole centres are X = 2 and 72 mm, Y = 3 and 43 mm, measured from the lower-left corner. Allow access underneath for the product power wires and programming pads.
 
-<a href="/docs/img/devices/motherboard/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/motherboard/mounting.svg" alt="Mounting holes and USB-C ports. J1 computer/service at the bottom and downstream ports J2–J5 along the top." /></a>
+<a href="/docs/img/devices/motherboard/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/motherboard/mounting.svg" alt="Mounting holes and USB-C ports. J1 console/program at the bottom and downstream ports J2–J5 along the top." /></a>
 
 [PCB and firmware source](https://github.com/tscircuit/basic-usbc-devices/tree/top-side-assembly/motherboard) · [Mounting drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/motherboard.circuit.tsx)
