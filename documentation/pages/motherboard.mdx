@@ -47,12 +47,16 @@ Open the computer service port at 115200 baud. Send one ASCII command per line e
 
 ## Mounting
 
-The PCB is **76 × 46 × 1.6 mm**. Four Ø2.2 mm holes accept M2 screws on an **70 × 40 mm** grid. With the downstream USB ports at the top, the hole centres are X = 3 and 73 mm, Y = 3 and 43 mm from the lower-left corner.
+The PCB is **76 × 46 × 1.6 mm**. Four Ø2.2 mm holes accept M2 screws on a **70 × 40 mm** grid. With the downstream USB ports at the top, the hole centres are X = 3 and 73 mm, Y = 3 and 43 mm from the lower-left corner.
 
 The power lever projects **4.75 mm past the J1 edge** and slides parallel to that edge. The assembled board is 50.75 mm deep including the lever. Allow 5.4 mm above the PCB for the tallest components and 1.9 mm below it for the switch leads, plus clearance for the power wires. Place the console USB-C cutout, power lever opening and microSD opening on the same enclosure face. Their centre lines are 27.5, 44 and 61.4 mm from the left PCB edge, respectively (the power dimension locates the switch body). The socket mouth sits 0.30 mm behind the PCB edge. Leave access above J_SWD for the programmer cable.
 
-The CAD downloads show the placed assembly. The default router has not produced fabrication-ready copper. First-article testing is pending. [Routing handoff](https://github.com/tscircuit/basic-usbc-devices/blob/top-side-assembly/AUTOROUTER-HANDOFF.md)
-
 <a href="/docs/img/devices/motherboard/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/motherboard/mounting.svg" alt="Mounting holes and USB-C ports. J1 console, power lever and microSD opening along the front, with J2–J5 along the back." /></a>
+
+## PCB fabrication
+
+The board uses four copper layers. Inner layer 1 carries the ground plane. Top, inner layer 2 and bottom carry routed traces. All components mount on top. The tscircuit design checks pass, and the exported Gerber and drill files pass an independent check for open and shorted nets. The USB traces were routed individually. Differential impedance and USB operation still need verification on the chosen stackup and first article.
+
+[Gerbers and drills (ZIP)](https://github.com/tscircuit/basic-usbc-devices/releases/download/rp2350-usb-motherboard-compact-routed-v1/motherboard-gerbers.zip) · [BOM](https://github.com/tscircuit/basic-usbc-devices/releases/download/rp2350-usb-motherboard-compact-routed-v1/motherboard-bom.csv) · [Component placements](https://github.com/tscircuit/basic-usbc-devices/releases/download/rp2350-usb-motherboard-compact-routed-v1/motherboard-cpl.csv)
 
 [PCB and firmware source](https://github.com/tscircuit/basic-usbc-devices/tree/top-side-assembly/motherboard) · [Mounting drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/motherboard.circuit.tsx)
