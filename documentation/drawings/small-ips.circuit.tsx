@@ -29,4 +29,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelUrl="./models/small-ips.glb" />
+export default () => <MountingSheet mount={mount} modelFile="small-ips.glb" />

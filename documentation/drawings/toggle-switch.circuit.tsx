@@ -30,4 +30,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelUrl="./models/toggle-switch.glb" />
+export default () => <MountingSheet mount={mount} modelFile="toggle-switch.glb" />

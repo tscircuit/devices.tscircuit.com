@@ -79,11 +79,12 @@ The Docusaurus site at [devices.tscircuit.com/docs](https://devices.tscircuit.co
 
 Each file in `documentation/drawings/*.circuit.tsx` contains the board outline, thickness, USB-C receptacles and mounting-hole centres from the linked PCB revision. Coordinates in that source use the PCB centre as their origin. For each USB-C port, record its reference and the centre of the footprint’s front shield edge in millimetres. The edge sets the cable entry direction. On multiport boards, give each connector its electrical role. The published sheet also gives coordinates from its lower-left corner. The populated 3D views come from the board’s Circuit JSON and are stored beside the sheets in `documentation/static/img/devices/`.
 
-To regenerate the sheets, install Bun and run the following from the drawings directory. The generator uses tscircuit’s native drawing exporter for the dimensioned plan and the isometric outline of the populated board. The separate color PNG is only used on the device page. The GLBs in the models directory are mechanical meshes from the same Circuit JSON, with textures removed and component geometry simplified for the line drawing.
+Run the following in `documentation/drawings` to regenerate every sheet. Pass device names to export a subset, for example `bun export.tsx motherboard speaker`.
 
 ```sh
-bun install
-PATH="$PWD/node_modules/.bin:$PATH" bun export.tsx
+bun export.tsx
 ```
+
+The script sends the device TSX and shared `MountingSheet.tsx` to the official drawing endpoint at `svg.tscircuit.com` and writes its response verbatim. Each sheet uses native part views, dimensions, part labels and page notes. The connector and isometric views share the populated GLB. When revising a model, commit the GLB in `models/` and update the pinned model revision in `MountingSheet.tsx`.
 
 The device pages link to the [versioned CAD downloads](https://github.com/tscircuit/devices.tscircuit.com/releases/tag/board-cad-2026-11-21). Downloadable GLBs use glTF’s meter units and include the populated board. STEP assemblies use millimeters with the PCB midplane at Z = 0. Actuator heights on the device pages and mounting sheets are measured from the component-side surface of the PCB.

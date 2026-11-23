@@ -22,4 +22,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelUrl="./models/compact-button.glb" />
+export default () => <MountingSheet mount={mount} modelFile="compact-button.glb" />

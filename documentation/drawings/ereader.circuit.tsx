@@ -29,4 +29,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelUrl="./models/ereader.glb" />
+export default () => <MountingSheet mount={mount} modelFile="ereader.glb" />

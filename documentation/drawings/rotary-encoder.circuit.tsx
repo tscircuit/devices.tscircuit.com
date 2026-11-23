@@ -30,4 +30,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelUrl="./models/rotary-encoder.glb" />
+export default () => <MountingSheet mount={mount} modelFile="rotary-encoder.glb" />

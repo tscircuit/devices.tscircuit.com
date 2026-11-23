@@ -7,7 +7,7 @@ import CadDownloads from "@site/src/components/CadDownloads"
 
 <img id="3d-render" className="device-render" src="/docs/img/devices/motherboard/render.png" alt="Four-port RP2350 USB Motherboard" />
 
-The motherboard runs a small program that can read and control USB devices inside a product. The included program lets a potentiometer select three drawings on a flex display.
+The RP2350 hosts up to four USB devices through the onboard hub. J2–J5 are the four device sockets. The included program lets a potentiometer select three drawings on a flex display.
 
 <CadDownloads board="motherboard" />
 
@@ -15,7 +15,7 @@ The motherboard runs a small program that can read and control USB devices insid
 
 Supply regulated 5 V and ground at the underside power pads. Connect a potentiometer and a flex display to any two of the four downstream ports. Turn the knob to select a circle, diagonal stripe or checkerboard. The controller starts on product power and runs with the computer unplugged.
 
-To inspect the program, connect the separate **Computer** port and select **Add device → RP2350 USB Motherboard**. The computer port powers the service interface. Keep product power connected to run the controller. Load the first firmware over the underside SWD pads. Each downstream device has a 100 mA design budget. Power and USB operation await first-article testing.
+To inspect the program, connect the separate **Computer** port and select **Add device → RP2350 USB Motherboard**. J1 powers the service interface and carries the serial console. Keep product power connected to run the controller. Program the current firmware through the underside SWD pads. J1 has no connection to the RP2350’s native USB data pins, so it cannot accept a BOOTSEL/UF2 upload. Each downstream device has a 100 mA design budget. Power and USB operation await first-article testing.
 
 The first firmware discovers USB CDC serial devices. The standalone program handles the potentiometer and flex display. The distance sensor and contact-switch boards use different USB interfaces and need additional host drivers.
 

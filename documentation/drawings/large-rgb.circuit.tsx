@@ -29,4 +29,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelUrl="./models/large-rgb.glb" />
+export default () => <MountingSheet mount={mount} modelFile="large-rgb.glb" />

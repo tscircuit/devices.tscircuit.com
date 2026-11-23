@@ -29,4 +29,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelUrl="./models/flex-display.glb" />
+export default () => <MountingSheet mount={mount} modelFile="flex-display.glb" />
