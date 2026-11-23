@@ -1,9 +1,18 @@
 import { assembly } from "tscircuit"
 
+// x and y locate the centre of the shield opening in PCB coordinates (mm).
+export interface UsbPort {
+  ref: string
+  x: number
+  y: number
+  edge: "top" | "bottom" | "left" | "right"
+  role?: string
+}
+
 export interface Mount {
   title: string
   heightNote?: string
-  usbEdge: "top" | "bottom"
+  usbPorts: readonly [UsbPort, ...UsbPort[]]
   width: number
   height: number
   thickness: number

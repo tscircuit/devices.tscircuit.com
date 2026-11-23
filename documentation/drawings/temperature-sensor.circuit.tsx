@@ -2,7 +2,9 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "Temperature sensor",
-  "usbEdge": "bottom",
+  usbPorts: [
+    { ref: "J1", x: 0, y: -11.59, edge: "bottom" },
+  ],
   "width": 18,
   "height": 24,
   "thickness": 1.6,

@@ -2,7 +2,9 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "5.83-inch e-paper display",
-  "usbEdge": "bottom",
+  usbPorts: [
+    { ref: "J1", x: 0, y: -18.59, edge: "bottom" },
+  ],
   "width": 36,
   "height": 38,
   "thickness": 1.6,

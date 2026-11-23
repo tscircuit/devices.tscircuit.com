@@ -3,7 +3,9 @@ import { MountingSheet } from "./MountingSheet"
 export const mount = {
   "title": "Pushbutton",
   "heightNote": "Released actuator tip: 12 mm above PCB top",
-  "usbEdge": "bottom",
+  usbPorts: [
+    { ref: "J1", x: 0, y: -14.59, edge: "bottom" },
+  ],
   "width": 24,
   "height": 30,
   "thickness": 1.6,

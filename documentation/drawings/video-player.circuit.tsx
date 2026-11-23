@@ -2,7 +2,9 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "3.5-inch video player",
-  "usbEdge": "bottom",
+  usbPorts: [
+    { ref: "J1", x: 0, y: -23.39, edge: "bottom" },
+  ],
   "width": 56,
   "height": 48,
   "thickness": 1.6,

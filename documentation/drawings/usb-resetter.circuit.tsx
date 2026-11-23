@@ -2,7 +2,11 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "USB resetter",
-  "usbEdge": "top",
+  usbPorts: [
+    { ref: "J1", x: 4, y: 20.69, edge: "top", role: "Control" },
+    { ref: "J2", x: -20.69, y: -7, edge: "left", role: "Switched output" },
+    { ref: "J3", x: 20.69, y: -7, edge: "right", role: "Passthrough input" },
+  ],
   "width": 42,
   "height": 42,
   "thickness": 1.6,

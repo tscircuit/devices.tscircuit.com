@@ -2,7 +2,9 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "Flex display",
-  "usbEdge": "bottom",
+  usbPorts: [
+    { ref: "J1", x: 0, y: -20.59, edge: "bottom" },
+  ],
   "width": 32,
   "height": 42,
   "thickness": 1.6,

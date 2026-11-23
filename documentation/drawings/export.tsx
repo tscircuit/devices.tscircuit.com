@@ -4,6 +4,7 @@ import {readdir, readFile, writeFile, mkdtemp, rm} from "node:fs/promises"
 import {join} from "node:path"
 import {tmpdir} from "node:os"
 import { $ } from "bun"
+import {UsbPortPlan, UsbPortLegend} from "./UsbPortDetails"
 import type {Mount} from "./MountingSheet"
 
 // Both views and all dimension leaders come from the native drawing exporter.
@@ -15,7 +16,7 @@ function SheetDetails({m}: {m: Mount}) {
     <text x="232" y="12" textAnchor="end" fontSize="3.2">MOUNTING  /  mm</text>
     <path d="M8 18 H232 M8 134 H232" stroke="#969696" strokeWidth=".28" />
     {m.heightNote && <text x="8" y="26" fontSize="3.8">{m.heightNote}</text>}
-    <text x="149" y="143" fontSize="3.3">J1 USB-C on {m.usbEdge} edge of plan</text>
+    <UsbPortLegend ports={m.usbPorts} />
     <text x="8" y="143" fontSize="3.6">{m.holes.length} × Ø{m.diameter} through · {m.thickness} thick PCB</text>
     <text x="8" y="151" fontSize="3.5">Hole centres from lower-left PCB corner: X = {xs.join(", ")} mm; Y = {ys.join(", ")} mm</text>
   </g>
@@ -33,13 +34,14 @@ try {
     const {mount, SheetCallout} = await import(join(dir,file))
     const details = renderToStaticMarkup(<SheetDetails m={mount}/>)
     const nativeSheet = await readFile(raw, "utf8")
-    let callout = ""
-    if (SheetCallout) {
-      const scale = nativeSheet.match(/Component side · ([\d.]+):1/)
-      if (!scale) throw Error("Missing component-side scale: " + slug)
-      callout = renderToStaticMarkup(<SheetCallout planScale={Number(scale[1])} />)
-    }
-    const sheet = nativeSheet.replace("</svg>", details + callout + "</svg>")
+    const scale = nativeSheet.match(/Component side · ([\d.]+):([\d.]+)/)
+    if (!scale) throw Error("Missing component-side scale: " + slug)
+    const planScale = Number(scale[1]) / Number(scale[2])
+    const callouts = renderToStaticMarkup(<>
+      <UsbPortPlan ports={mount.usbPorts} planScale={planScale} />
+      {SheetCallout && <SheetCallout planScale={planScale} />}
+    </>)
+    const sheet = nativeSheet.replace("</svg>", details + callouts + "</svg>")
     if (!sheet.includes("drawing_dimension_line") || !sheet.includes("Assembled board · isometric")) throw Error("Incomplete sheet: "+slug)
     await writeFile(join(assetDir,"mounting.svg"),sheet)
   }

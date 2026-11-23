@@ -2,7 +2,9 @@ import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
   "title": "2.8-inch IPS display",
-  "usbEdge": "bottom",
+  usbPorts: [
+    { ref: "J1", x: 0, y: -18.59, edge: "bottom" },
+  ],
   "width": 36,
   "height": 38,
   "thickness": 1.6,
