@@ -1,5 +1,9 @@
 #include "pico/stdlib.h"
+#ifdef RESETTER_DISCRETE_RGB
+#include "hardware/pwm.h"
+#else
 #include "pico/status_led.h"
+#endif
 #include "hardware/adc.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,6 +29,33 @@ static void status(void) {
            in / 1000, in % 1000, out / 1000, out % 1000);
 }
 
+#ifdef RESETTER_DISCRETE_RGB
+// GPIO23/24/25 sink the red, green and blue channels through separate 1k resistors.
+static const uint rgb_pins[] = {23, 24, 25};
+
+static void init_indicator(void) {
+    for (unsigned i = 0; i < 3; ++i) {
+        uint pin = rgb_pins[i];
+        uint slice = pwm_gpio_to_slice_num(pin);
+        pwm_set_wrap(slice, 255);
+        pwm_set_gpio_level(pin, 256);  // continuously high = off
+        gpio_set_function(pin, GPIO_FUNC_PWM);
+        pwm_set_enabled(slice, true);
+    }
+}
+
+static void set_indicator(unsigned color) {
+    for (unsigned i = 0; i < 3; ++i) {
+        unsigned channel = (color >> (16 - 8 * i)) & 0xff;
+        // Legacy status colors use a 0..16 scale. Current is limited in hardware.
+        pwm_set_gpio_level(rgb_pins[i], 256 - channel * 16);
+    }
+}
+#else
+#define init_indicator status_led_init
+#define set_indicator colored_status_led_set_on_with_color
+#endif
+
 static void update_led(void) {
     unsigned color = led_mode == LED_ON ? 0x001000 : 0;
     if (led_mode == LED_AUTO) {
@@ -34,7 +65,7 @@ static void update_led(void) {
     }
     static unsigned previous = ~0u;
     if (color != previous) {
-        colored_status_led_set_on_with_color(color);
+        set_indicator(color);
         previous = color;
     }
 }
@@ -61,7 +92,7 @@ static void execute(char *line) {
         update_led();
         printf("OK led=%s\n", arg);
     } else if (arg) puts("ERR unexpected argument");
-    else if (!strcmp(cmd, "id")) puts("DEVICE tscircuit resetter 1.0.0");
+    else if (!strcmp(cmd, "id")) puts("DEVICE tscircuit resetter " RESETTER_VERSION);
     else if (!strcmp(cmd, "help") || !strcmp(cmd, "?"))
         puts("id | help | status | on | off | cycle [seconds=1] | reset [seconds=1] | led on|off|auto");
     else if (!strcmp(cmd, "status")) status();
@@ -79,7 +110,7 @@ int main(void) {
     adc_init();
     adc_gpio_init(26);
     adc_gpio_init(27);
-    status_led_init();
+    init_indicator();
     stdio_init_all();
     char line[80];
     unsigned used = 0;

@@ -7,7 +7,7 @@ import CadDownloads from "@site/src/components/CadDownloads"
 
 <img id="3d-render" className="device-render" src="/docs/img/devices/usb-resetter/render.png" alt="3D render of the assembled usb resetter PCB" />
 
-A three-port USB power switch that can restart a downstream device on a timer.
+The compact USB resetter restarts a downstream device on a timer. The control computer connects at the top, the upstream supply connects on the right, and the device being reset connects on the left.
 
 <CadDownloads board="usb-resetter" />
 
@@ -17,13 +17,24 @@ A three-port USB power switch that can restart a downstream device on a timer.
 
 Connect the control port to the computer, the passthrough input to the upstream supply, and the target to the output. Choose **Add device → USB resetter**. Send `status` to read the input and output voltages, or `cycle 1` to interrupt downstream power for one second. Leave access to all three connectors.
 
+### Status indicator
+
+The three adjacent LEDs are red, green and blue. The indicator starts off. Send `led auto` to show the power state.
+
+| Light | Power state |
+| --- | --- |
+| Blue | Input is below 4 V. |
+| Red | Input power is present and output power is switched off. |
+| Green | Output is enabled and measures at least 4 V. |
+| Red and green | Output is enabled but measures below 4 V. |
+
 ## Protocol
 
 **USB serial** · 115200 baud · DTR on. Send one ASCII command per line, ending in LF (`\n`).
 
 | Command | Purpose | Reply |
 | --- | --- | --- |
-| `id` | Identify the device and firmware. | `DEVICE tscircuit resetter 1.0.0` |
+| `id` | Identify the device and firmware. | `DEVICE tscircuit resetter 2.0.0` |
 | `help` | List supported commands. | One line of command syntax. |
 | `?` | Alias for `help`. | Same command list. |
 | `status` | Read output state and measured input/output voltages. | Status line shown below. |
@@ -48,8 +59,19 @@ OK out=on vin=5.001 vout=4.992
 
 ## Mounting
 
-The PCB measures **42 × 42 mm**, with **4 × Ø3.2 mm** clearance holes for M3 screws. The centre-to-centre spacing is **35 × 21 mm**. Orient the component side with the **J1 USB-C port at the top**. Measure right and up from the **lower-left corner of the PCB** in the component-side view. The hole centres are at X = 3.5, 38.5 mm and Y = 3.5, 24.5 mm.
+The compact PCB measures **36 × 30 mm**. Four **Ø2.2 mm** holes fit M2 screws on a **30 × 20 mm** grid. With J1 at the top, measure from the lower-left corner to X = 3 and 33 mm and Y = 5 and 25 mm. The LED centres are 2 mm apart.
 
 <a href="/docs/img/devices/usb-resetter/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/usb-resetter/mounting.svg" alt="Mounting holes and USB-C ports. J1 control at the top, J2 switched output on the left, and J3 passthrough input on the right." /></a>
 
-<a href="/docs/img/devices/usb-resetter/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/usb-resetter.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/92ca17f3b1f2052ba7c1ac47bba030ba8016446b/resetter.circuit.tsx)
+<a href="/docs/img/devices/usb-resetter/mounting.svg">Open full-size drawing</a> · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/usb-resetter.circuit.tsx) · [PCB source](https://github.com/tscircuit/basic-usbc-devices/blob/d25249655fd62f5e207a49c7e250c436730d4c61/new-devices/compact-resetter.circuit.tsx)
+
+## Firmware and board revisions
+
+Hold BOOTSEL while plugging in the **control** port. Copy the UF2 for your board to the RPI-RP2 drive.
+
+| Identify your board | Firmware | Enclosure files |
+| --- | --- | --- |
+| 36 × 30 mm, four M2 holes, three adjacent LEDs | [Compact v2.0.0 UF2](https://github.com/tscircuit/devices.tscircuit.com/raw/refs/heads/main/firmware/releases/compact-resetter-2.0.0.uf2) | Use the drawing and CAD downloads above. |
+| 42 × 42 mm, four M3 holes, one square RGB LED | [Original v1.0.0 UF2](https://github.com/tscircuit/devices.tscircuit.com/raw/refs/heads/main/firmware/releases/resetter-1.0.0.uf2) | [Original mounting drawing](https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/e6c03a5/documentation/static/img/devices/usb-resetter/mounting.svg) · [Original STEP](https://github.com/tscircuit/devices.tscircuit.com/releases/download/board-cad-2026-11-21/usb-resetter.step) |
+
+[Compact board fabrication files and assembly BOM](https://github.com/tscircuit/basic-usbc-devices/releases/tag/compact-resetter-v2)

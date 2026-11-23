@@ -26,7 +26,7 @@ Serial commands include `id`, `help`, and `init`. After `OK init`, send `image` 
 
 Connect the control port, choose **Add device → USB resetter**, and select the board. The serial console supports `id`, `help`, `status`, `off`, `on`, `cycle [seconds]` (alias `reset`), and `led on|off|auto`. A cycle defaults to one second and restores output on the board's timer. Explicit on/off commands cancel a pending cycle. Power passthrough starts enabled and the RGB indicator starts off. The separate passthrough input powers the downstream load. Status reports the switch command and both sensed voltages.
 
-To reflash, connect the control port in BOOTSEL mode and copy `firmware/releases/resetter-1.0.0.uf2` to RPI-RP2. To rebuild, set `PICO_SDK_PATH` to Raspberry Pi Pico SDK 2.3.1 (with submodules), then run `cmake -S firmware/resetter -B build/resetter -DPICO_BOARD=pico` and `cmake --build build/resetter`.
+To reflash, hold BOOTSEL while connecting the control port. Copy `firmware/releases/compact-resetter-2.0.0.uf2` to RPI-RP2 for the 36 × 30 mm board with three adjacent LEDs. The original 42 × 42 mm board uses `firmware/releases/resetter-1.0.0.uf2`. To rebuild, set `PICO_SDK_PATH` to Raspberry Pi Pico SDK 2.3.1 (with submodules), then run `cmake -S firmware/resetter -B build/resetter -DPICO_BOARD=pico` and `cmake --build build/resetter`.
 
 ## Distance sensor
 
