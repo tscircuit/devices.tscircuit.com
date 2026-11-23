@@ -37,10 +37,11 @@ try {
     const scale = nativeSheet.match(/Component side · ([\d.]+):([\d.]+)/)
     if (!scale) throw Error("Missing component-side scale: " + slug)
     const planScale = Number(scale[1]) / Number(scale[2])
-    const callouts = renderToStaticMarkup(<>
+    // Render the labels in SVG context so React keeps each title with its port.
+    const callouts = renderToStaticMarkup(<svg>
       <UsbPortPlan ports={mount.usbPorts} planScale={planScale} />
       {SheetCallout && <SheetCallout planScale={planScale} />}
-    </>)
+    </svg>).slice("<svg>".length, -"</svg>".length)
     const sheet = nativeSheet.replace("</svg>", details + callouts + "</svg>")
     if (!sheet.includes("drawing_dimension_line") || !sheet.includes("Assembled board · isometric")) throw Error("Incomplete sheet: "+slug)
     await writeFile(join(assetDir,"mounting.svg"),sheet)
