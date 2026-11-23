@@ -40,4 +40,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelFile="motherboard.glb" modelRevision="0eeaa87912e2c59cacce3bdfeb601136858639ff" />
+export default () => <MountingSheet mount={mount} modelFile="motherboard.glb" modelRevision="817287b0d319aff92a4d5522028c1fdb3ad75caa" />
