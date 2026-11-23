@@ -4,11 +4,13 @@ import {identifySerial} from "./serial.js"
 import {startRanging, startSerial} from "./device-controls.js"
 
 const names = {
+  "esp32-motherboard": "ESP32-S3 Wi-Fi USB Motherboard",
   motherboard: "RP2350 USB Motherboard",
   encoder: "Rotary encoder", potentiometer: "Potentiometer", distance: "Distance sensor", display: "Flex display",
   button: "Button", toggle: "Toggle switch", limit: "Limit switch", buzzer: "Buzzer", resetter: "USB resetter"
 }
 const serialIds = {
+  "esp32-motherboard": {usbVendorId: 0x1a86, usbProductId: 0x7523},
   motherboard: {usbVendorId: 0x1a86, usbProductId: 0x7523},
   toggle: {usbVendorId: 0x1a86, usbProductId: 0x7523},
   ch552: {usbVendorId: 0x1209, usbProductId: 0xc550},
@@ -174,7 +176,7 @@ async function restore(handle, usb) {
     : info.usbVendorId === serialIds.toggle.usbVendorId && info.usbProductId === serialIds.toggle.usbProductId
   if (switchHandle) {
     const target = cards.get(remembered.get(handle))
-    if (target && (isContactSwitch(target.saved.kind) || target.saved.kind === "motherboard") && !target.session && usesUsb(target.saved.kind) === usb)
+    if (target && (isContactSwitch(target.saved.kind) || ["motherboard", "esp32-motherboard"].includes(target.saved.kind)) && !target.session && usesUsb(target.saved.kind) === usb)
       await attach(handle, usb, {requested:target.saved.kind, target, restoring:true}).catch(() => {})
     return
   }

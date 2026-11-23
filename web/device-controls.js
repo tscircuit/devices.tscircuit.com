@@ -11,7 +11,7 @@ export function startSerial(root, s, failed) {
     log.scrollTop = log.scrollHeight
   }
   async function send(cmd) {
-    try { await s.write(cmd); record("> " + cmd) } catch (err) { failed(err) }
+    try { await s.write(cmd); record(cmd.startsWith("wifi join ") ? "> wifi join" : "> " + cmd) } catch (err) { failed(err) }
   }
   async function exchange(data, expected) {
     let timer
@@ -29,6 +29,18 @@ export function startSerial(root, s, failed) {
     root.querySelector("[data-command=help]").disabled = locked
   }
   lock(false)
+  el("wifi-controls").hidden = s.kind !== "esp32-motherboard"
+  el("wifi-join").onsubmit = event => {
+    event.preventDefault()
+    const ssid = el("wifi-ssid").value, pass = el("wifi-pass").value
+    const bytes = new TextEncoder()
+    if (/[\r\n\t]/.test(ssid + pass) || bytes.encode(ssid).length > 32 || bytes.encode(pass).length > 63) {
+      record("Use a network name up to 32 bytes and a passphrase up to 63 bytes, without tabs or line breaks.")
+      return
+    }
+    el("wifi-pass").value = ""
+    void send("wifi join " + ssid + "\t" + pass)
+  }
   el("serial").hidden = false
   el("encoder").hidden = s.kind !== "encoder"
   el("detents").textContent = "—"
@@ -87,6 +99,8 @@ export function startSerial(root, s, failed) {
   for (const b of root.querySelectorAll("[data-command]")) b.onclick = () => send(b.dataset.command)
   return () => {
     ack?.reject(Error("Disconnected."))
+    el("wifi-controls").hidden = true
+    el("wifi-pass").value = ""
     display.hideDisplay()
   }
 }

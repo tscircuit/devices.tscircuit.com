@@ -1,0 +1,59 @@
+---
+title: ESP32-S3 Wi-Fi USB Motherboard
+description: Mounting, antenna, programming and console commands for the ESP32-S3 four-port USB host.
+---
+
+<img id="3d-render" className="device-render" src="/docs/img/devices/esp32-motherboard/render.png" alt="ESP32-S3 Wi-Fi motherboard with four downstream USB-C sockets, front power lever and microSD slot" />
+
+The ESP32-S3 runs your program, connects to 2.4 GHz Wi-Fi and hosts up to four USB peripherals through its onboard hub. The module includes 16 MiB of flash and 8 MiB of PSRAM. The starter firmware lists attached USB devices, checks a microSD card and joins a wireless network.
+
+<nav className="cad-downloads" aria-label="Download board CAD">
+  <a href="https://github.com/tscircuit/basic-usbc-devices/releases/download/esp32-s3-wifi-motherboard-v1/esp32-motherboard.glb">Download GLB</a>
+  <a href="https://github.com/tscircuit/basic-usbc-devices/releases/download/esp32-s3-wifi-motherboard-v1/esp32-motherboard.step">Download STEP</a>
+</nav>
+
+## Getting started
+
+1. Attach a 2.4 GHz, 50 Ω antenna to the small coaxial socket on top of the radio module. Choose a U.FL or MHF I plug. The antenna and cable are separate enclosure parts. Espressif specifies up to 2.33 dBi gain. [Module datasheet, section 10](https://documentation.espressif.com/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf)
+2. Supply regulated 5 V at TP_PWR1 and ground at TP_PWR2 on the underside. Allow 1.5 A for the board and peripherals. Slide the front power lever to **ON**. J2–J5 each have a 100 mA device budget.
+3. Connect J1 to your computer. On a blank board, flash the starter firmware below. Open [My devices](https://devices.tscircuit.com/), choose **Add device → ESP32-S3 Wi-Fi USB Motherboard**, then select the serial port.
+4. Choose **Scan networks**, enter the network name and passphrase, then select **Join network**. **Connection status** reports the IP address after DHCP. The starter uses WPA2-Personal or compatible networks and keeps credentials in RAM until reset or power-off.
+
+## Programming
+
+Hold **BOOT**, tap **RESET**, then release **BOOT**. Close the browser’s serial connection before flashing. Download the [combined firmware image](https://github.com/tscircuit/basic-usbc-devices/releases/download/esp32-s3-wifi-motherboard-v1/esp32-motherboard-firmware.bin). In an ESP-IDF v5.5.1 shell, replace `PORT` with J1’s serial port and run:
+
+```sh
+python -m esptool --chip esp32s3 --port PORT --before no_reset --after no_reset write_flash 0x0 esp32-motherboard-firmware.bin
+```
+
+Tap **RESET** once more to start the program. J1 remains available for the runtime console while J2–J5 serve the product’s USB devices.
+
+## Console protocol
+
+Open J1 at **115200 baud, 8N1**. Send one command per line ending in LF.
+
+| Command | Purpose | Reply |
+| --- | --- | --- |
+| `id` | Identify the board and firmware. | `DEVICE tscircuit esp32-motherboard 1.0.0` |
+| `help` | List supported commands. | One line of usage text. |
+| `devices` | List enumerated USB addresses, including the hub. | One `USB <address>` line per device, then `OK`. |
+| `sd` | Mount a FAT microSD card, read its capacity and unmount it. | `SD <capacity> MiB` or `ERR sd <reason>`. |
+| `wifi scan` | Scan for nearby networks. | Up to 12 `AP <RSSI in dBm> <network name>` lines, then `OK`. |
+| `wifi join <SSID><TAB><passphrase>` | Join a personal network. Use a literal tab between the two values. | `OK connecting` or `ERR wifi <reason>`. |
+| `wifi status` | Check association and DHCP. | `WIFI disconnected`, `WIFI waiting for DHCP`, or `WIFI connected <IP>`. |
+| `wifi leave` | Disconnect and clear the Wi-Fi configuration. | `OK` or `ERR wifi <reason>`. |
+
+The host supports low-speed and full-speed USB, up to 12 Mbit/s shared across the hub. Simultaneous device transfers depend on how many endpoints each driver uses. To control a potentiometer or display, add the appropriate USB class driver to the starter. [ESP-IDF host guide](https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32s3/api-reference/peripherals/usb_host.html)
+
+## Mounting
+
+The **76 × 46 × 1.6 mm** PCB has four Ø2.2 mm M2 holes on a **70 × 40 mm** grid. Hole centres are 3 mm from the adjacent edges. The front console socket, power lever and microSD opening line up with the RP2350 motherboard. Allow 4.75 mm beyond the edge for the power lever, 1.9 mm below the board for its leads, and space above the module for the antenna plug and cable. Follow the antenna manufacturer’s clearance guidance when mounting it in the enclosure.
+
+<a href="/docs/img/devices/esp32-motherboard/mounting.svg"><img className="mount-sheet" src="/docs/img/devices/esp32-motherboard/mounting.svg" alt="Dimensioned mounting holes, connector locations and isometric assembly of the ESP32-S3 motherboard" /></a>
+
+## PCB files
+
+The four-layer board has a ground plane on inner layer 1 and top-side assembly. The exported copper and drills passed connectivity checks across all 77 named nets. First-article USB operation, radio performance and power under load still need measurement.
+
+[Gerbers and drills](https://github.com/tscircuit/basic-usbc-devices/releases/download/esp32-s3-wifi-motherboard-v1/esp32-motherboard-gerbers.zip) · [BOM](https://github.com/tscircuit/basic-usbc-devices/releases/download/esp32-s3-wifi-motherboard-v1/esp32-motherboard-bom.csv) · [Component placements](https://github.com/tscircuit/basic-usbc-devices/releases/download/esp32-s3-wifi-motherboard-v1/esp32-motherboard-cpl.csv) · [PCB and firmware source](https://github.com/tscircuit/basic-usbc-devices/tree/esp32-s3-wifi-motherboard) · [Drawing TSX](https://github.com/tscircuit/devices.tscircuit.com/blob/main/documentation/drawings/esp32-motherboard.circuit.tsx)
