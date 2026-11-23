@@ -8,7 +8,7 @@ export const mount = {
     { ref: "J3", x: 17.74, y: -1.2, edge: "right", role: "Passthrough input" },
   ],
   controls: [
-    { ref: "D1_D3", label: "RGB indicator", x: -3, y: -12, labelX: 18, labelY: -43 },
+    { ref: "D1_D3", label: "RGB indicator", x: -3, y: -12, labelX: 44, labelY: -31 },
   ],
   width: 36, height: 30, thickness: 1.6, diameter: 2.2,
   holes: [[-15,-10],[-15,10],[15,-10],[15,10]],
