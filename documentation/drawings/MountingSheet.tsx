@@ -22,7 +22,7 @@ export interface Mount {
 }
 
 // The populated meshes were exported with both in-plane axes reversed.
-const modelDirectory = "https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/7f0d761136554d8b8678c0baae401596f2de888a/documentation/drawings/models"
+const modelDirectory = "https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/fbd66fb9b68e6f47f96029c59ad1bc9fab6c7b26/documentation/drawings/models"
 
 
 export function MountingSheet({mount, modelFile}: {mount: Mount, modelFile: string}) {
