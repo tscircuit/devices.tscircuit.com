@@ -11,6 +11,7 @@ export const mount = {
   ],
   controls: [
     { ref: "SW_MODE", label: "RUN / PROGRAM", x: 15, y: 18, labelX: 31, labelY: 36 },
+    { ref: "SW_POWER", label: "POWER", x: 16.25, y: -22.5, labelX: 18, labelY: -44 },
     { ref: "SW_RESET", label: "RESET", x: 35.5, y: -9.5, labelX: 49, labelY: 4 },
     { ref: "SW_BOOT", label: "BOOT", x: 35.5, y: -15.5, labelX: 49, labelY: -15 },
   ],
@@ -38,4 +39,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelFile="motherboard.glb" modelRevision="1916433e8f7403d418bb59ec0b23961932129cb1" />
+export default () => <MountingSheet mount={mount} modelFile="motherboard.glb" modelRevision="0eeaa87912e2c59cacce3bdfeb601136858639ff" />
