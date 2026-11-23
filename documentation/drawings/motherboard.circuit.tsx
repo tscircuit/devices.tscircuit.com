@@ -9,9 +9,10 @@ export const mount = {
     { ref: "J4", x: -8.6, y: 22.59, edge: "top", role: "Downstream" },
     { ref: "J5", x: 2.2, y: 22.59, edge: "top", role: "Downstream" },
   ],
+  undersidePads: "3V3 ref · SWDIO · SWCLK · GND",
   controls: [
     { ref: "SW_MODE", label: "RUN / PROGRAM", x: 15, y: 18, labelX: 31, labelY: 36 },
-    { ref: "SW_POWER", label: "POWER", x: 16.25, y: -22.5, labelX: 18, labelY: -44 },
+    { ref: "SW_POWER", label: "POWER", x: 16.25, y: -22.5, labelX: 44, labelY: -24 },
     { ref: "SW_RESET", label: "RESET", x: 35.5, y: -9.5, labelX: 49, labelY: 4 },
     { ref: "SW_BOOT", label: "BOOT", x: 35.5, y: -15.5, labelX: 49, labelY: -15 },
   ],

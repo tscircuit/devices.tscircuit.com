@@ -10,6 +10,7 @@ export interface UsbPort {
 }
 
 export interface Mount {
+  undersidePads?: string
   controls?: readonly { ref: string, label: string, x: number, y: number, labelX: number, labelY: number }[]
   speakerHeader?: { x: number, y: number }
   title: string
@@ -112,6 +113,10 @@ export function MountingSheet({mount, modelFile, modelRevision = originalModels}
           <assembly.drawing.note key={port.ref} text={port.ref + " USB-C · " + port.role}
             paperX={-28 + Math.floor(i / 3) * 74} paperY={-61 - (i % 3) * 9} fontSize={3.6} />
         ))}
+        {mount.undersidePads && <>
+          <assembly.drawing.note text="SWD · underside pads" paperX={104} paperY={-61} fontSize={3.8} />
+          <assembly.drawing.note text={mount.undersidePads} paperX={104} paperY={-70} fontSize={3.0} />
+        </>}
         {mount.speakerHeader && <>
           <assembly.drawing.note text="J2  JST SH · 2 pins · 1 mm pitch · top entry" paperX={-28} paperY={-60} fontSize={3.8} />
           <assembly.drawing.note text="Board BM02B-SRSS-TB · Cable SHR-02V-S-B" paperX={-28} paperY={-70} fontSize={3.4} />
