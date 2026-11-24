@@ -30,4 +30,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelFile="potentiometer.glb" />
+export default () => <MountingSheet mount={mount} modelFile="potentiometer.glb" modelRevision="7c4742cff2eed1688d3db168575774245cdc291e" />
