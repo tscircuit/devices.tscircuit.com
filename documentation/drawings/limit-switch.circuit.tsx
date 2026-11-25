@@ -1,3 +1,4 @@
+import { getCadDownloadUrl } from "./cad-release"
 import { MountingSheet } from "./MountingSheet"
 
 export const mount = {
@@ -30,4 +31,4 @@ export const mount = {
   ]
 } as const
 
-export default () => <MountingSheet mount={mount} modelFile="limit-switch.glb" />
+export default () => <MountingSheet mount={mount} releaseGlbUrl={getCadDownloadUrl("limit-switch", "glb")} />
