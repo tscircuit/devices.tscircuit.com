@@ -28,9 +28,23 @@ export interface Mount {
 // The populated meshes were exported with both in-plane axes reversed.
 const originalModels = "7f0d761136554d8b8678c0baae401596f2de888a"
 
+type DrawingModel =
+  | { releaseGlbUrl: string }
+  | { modelFile: string, modelRevision?: string }
 
-export function MountingSheet({mount, modelFile, modelRevision = originalModels}: {mount: Mount, modelFile: string, modelRevision?: string}) {
-  const modelDirectory = "https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/" + modelRevision + "/documentation/drawings/models"
+export function MountingSheet(props: {mount: Mount} & DrawingModel) {
+  const { mount } = props
+  // Release assemblies are meter-scale and Y-up. Legacy drawing meshes are in mm and Z-up.
+  const cadModel = "releaseGlbUrl" in props
+    ? {
+        glbUrl: props.releaseGlbUrl,
+        modelUnitToMmScale: 1000,
+        rotationOffset: {x: -90, y: 0, z: 180},
+      }
+    : {
+        glbUrl: `https://raw.githubusercontent.com/tscircuit/devices.tscircuit.com/${props.modelRevision ?? originalModels}/documentation/drawings/models/${props.modelFile}`,
+        rotationOffset: {x: 0, y: 0, z: 180},
+      }
   const {width, height, thickness, diameter, holes} = mount
   // For each pitch, pick the extreme holes nearest the top or right dimension.
   const pitch = (axis: 0 | 1) => {
@@ -69,8 +83,7 @@ export function MountingSheet({mount, modelFile, modelRevision = originalModels}
           <hole key={i} name={"H" + (i+1)} pcbX={-x} pcbY={-y} diameter={diameter} />
         ))}
       </board>
-      <assembly.part name="populated" cadModel={{glbUrl: modelDirectory + "/" + modelFile,
-        rotationOffset: {x: 0, y: 0, z: 180}, modelOriginPosition: {x: 0, y: 0, z: 0}}} />
+      <assembly.part name="populated" cadModel={{...cadModel, modelOriginPosition: {x: 0, y: 0, z: 0}}} />
       <assembly.drawing.page name="mounting" width={360} height={190}>
         <assembly.drawing.note name="title" text={mount.title} paperX={-169} paperY={80} fontSize={6} />
         <assembly.drawing.note text="Mounting dimensions in mm" paperX={90} paperY={80} fontSize={3.3} />
