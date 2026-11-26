@@ -1,19 +1,39 @@
 ---
-title: Flex display
-description: "Flex display mounting hole locations, usage and protocol."
+title: USB-C 3.5-inch IPS Display with Controller Board
+description: "Specifications, mounting dimensions and USB commands for the included IPS panel and controller board."
 ---
 
 import CadDownloads from "@site/src/components/CadDownloads"
 
 <img id="3d-render" className="device-render" src="/docs/img/devices/flex-display/render.png" alt="3D render of the assembled flex display PCB" />
 
-A USB adapter for streaming pictures or video to the 3.5-inch bare ER-TFT035IPS-6 panel.
+The 3.5-inch IPS color display and its USB-C controller board are both included. Use the device console to display a photo, stream video frames, or adjust the backlight.
 
 <CadDownloads board="flex-display" />
 
 <a href="/docs/datasheets/flex-display.pdf">Download datasheet (PDF)</a>
 
 **Modeled component height: approximately 3.3 mm above the component-side PCB surface.** The CAD files show the populated carrier. Allow separate space for the panel and flex cable.
+
+## Display specifications
+
+| Parameter | Specification |
+| --- | --- |
+| Included hardware | BuyDisplay ER-TFT035IPS-6 IPS TFT panel and tscircuit USB-C controller board |
+| Resolution | 320 × 480 pixels native. The console sends 480 × 320 landscape stills. |
+| Panel controller | ILI9488 |
+| Display area | 48.96 × 73.44 mm active area (portrait), 0.153 mm pixel pitch |
+| Panel dimensions | 54.50 × 83.00 × 2.30 mm with the flex folded (panel only) |
+| Panel optics | 220 cd/m² typical brightness, 500:1 typical contrast, 80° viewing angle in each direction |
+| Panel response and temperature | 20 ms typical pixel response. Panel operating range −20 to 70 °C, storage −30 to 80 °C. |
+| Panel connector | 50-pin, 0.5 mm pitch, bottom-contact ZIF for the display ribbon |
+| Host interface | USB-C for power and USB serial data. Set the host to 115200 baud with DTR enabled. |
+| Image and video | 16-bit RGB565, high byte first. Stills use 480 × 320 pixels (307,200 bytes). Video uses 120 × 80 pixels (19,200 bytes), scaled to fill the display. |
+| Backlight | Software brightness control from 0 to 100% |
+| Controller PCB | 32 × 42 mm. Modeled components extend approximately 3.3 mm above the PCB. |
+| Board mounting | Four Ø2.2 mm clearance holes for M2 screws on 19 × 25 mm centers. Support the panel separately. |
+
+[Manufacturer’s panel datasheet (PDF)](https://www.buydisplay.com/download/manual/ER-TFT035IPS-6_Datasheet.pdf)
 
 ## Usage
 
